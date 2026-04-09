@@ -1,5 +1,6 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useNavigate } from 'react-router-dom'
 import { useGameStore } from '../store/gameStore'
 import { CardRow } from '../components/CardRow'
 import { StagePrompt } from '../components/StagePrompt'
@@ -16,9 +17,22 @@ export function Game() {
     placeBet, makeGuess, continuePlaying, cashOut, newRound,
   } = useGameStore()
 
+  const navigate = useNavigate()
   const [showFlash, setShowFlash] = useState<'win' | 'loss' | null>(null)
   const [showAchievement, setShowAchievement] = useState(false)
   const [shake, setShake] = useState(false)
+  const [showMenu, setShowMenu] = useState(false)
+  const menuRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setShowMenu(false)
+      }
+    }
+    if (showMenu) document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [showMenu])
 
   // React to result changes
   useEffect(() => {
@@ -46,6 +60,43 @@ export function Game() {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-between py-6 px-4 relative overflow-hidden">
+      {/* Hamburger menu */}
+      <div ref={menuRef} className="absolute top-4 left-4 z-50">
+        <button
+          onClick={() => setShowMenu(v => !v)}
+          className="w-10 h-10 flex flex-col items-center justify-center gap-1.5 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 transition-colors"
+        >
+          <span className="w-5 h-0.5 bg-white/70 rounded" />
+          <span className="w-5 h-0.5 bg-white/70 rounded" />
+          <span className="w-5 h-0.5 bg-white/70 rounded" />
+        </button>
+        <AnimatePresence>
+          {showMenu && (
+            <motion.div
+              initial={{ opacity: 0, y: -8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.15 }}
+              className="absolute top-12 left-0 w-48 rounded-xl bg-[#0f2318] border border-white/10 shadow-xl overflow-hidden"
+            >
+              <button
+                onClick={() => { setShowMenu(false); navigate('/') }}
+                className="w-full px-4 py-3 text-left text-sm text-white/80 hover:bg-white/10 hover:text-white transition-colors"
+              >
+                ← Go back to Title
+              </button>
+              <div className="h-px bg-white/10" />
+              <button
+                onClick={() => window.close()}
+                className="w-full px-4 py-3 text-left text-sm text-red-400 hover:bg-red-900/20 hover:text-red-300 transition-colors"
+              >
+                ✕ Exit the Game
+              </button>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+
       {/* Win/loss flash overlay */}
       <AnimatePresence>
         {showFlash && (
