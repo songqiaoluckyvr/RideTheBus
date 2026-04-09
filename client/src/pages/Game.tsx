@@ -14,7 +14,7 @@ export function Game() {
   const {
     phase, currentStage, bet, balance, revealedCards, lastResult, roundPayout, history,
     name,
-    placeBet, makeGuess, continuePlaying, cashOut, newRound, reset,
+    placeBet, makeGuess, continuePlaying, cashOut, newRound, restartSession,
   } = useGameStore()
 
   const navigate = useNavigate()
@@ -80,7 +80,7 @@ export function Game() {
               className="absolute top-12 left-0 w-48 rounded-xl bg-[#0f2318] border border-white/10 shadow-xl overflow-hidden"
             >
               <button
-                onClick={() => { setShowMenu(false); reset(); navigate('/') }}
+                onClick={() => { setShowMenu(false); navigate('/') }}
                 className="w-full px-4 py-3 text-left text-sm text-white/80 hover:bg-white/10 hover:text-white transition-colors"
               >
                 ← Go back to Title
@@ -196,6 +196,8 @@ export function Game() {
           onCashOut={cashOut}
           onContinue={continuePlaying}
           onNewRound={newRound}
+          onBackToTitle={() => navigate('/')}
+          onRestart={restartSession}
         />
 
         {/* History */}

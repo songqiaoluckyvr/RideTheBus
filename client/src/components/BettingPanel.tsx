@@ -13,6 +13,8 @@ interface Props {
   onCashOut: () => void
   onContinue: () => void
   onNewRound: () => void
+  onBackToTitle: () => void
+  onRestart: () => void
 }
 
 const QUICK_BETS = [10, 25, 50, 100, 250]
@@ -27,6 +29,8 @@ export function BettingPanel({
   onCashOut,
   onContinue,
   onNewRound,
+  onBackToTitle,
+  onRestart,
 }: Props) {
   const [betInput, setBetInput] = useState('')
 
@@ -181,14 +185,35 @@ export function BettingPanel({
                 <p className="text-gold/80 text-lg">+${(roundPayout - currentBet).toLocaleString()} profit</p>
               </div>
             )}
-            <motion.button
-              whileHover={{ scale: 1.04 }}
-              whileTap={{ scale: 0.96 }}
-              onClick={onNewRound}
-              className="px-8 py-3 rounded-xl bg-felt-light border border-gold/40 text-white font-bold hover:border-gold/80 transition-colors"
-            >
-              Play Again
-            </motion.button>
+            <div className="flex gap-3 w-full">
+              {balance > 0 ? (
+                <motion.button
+                  whileHover={{ scale: 1.04 }}
+                  whileTap={{ scale: 0.96 }}
+                  onClick={onNewRound}
+                  className="flex-1 py-3 rounded-xl bg-felt-light border border-gold/40 text-white font-bold hover:border-gold/80 transition-colors"
+                >
+                  Continue to Play
+                </motion.button>
+              ) : (
+                <motion.button
+                  whileHover={{ scale: 1.04 }}
+                  whileTap={{ scale: 0.96 }}
+                  onClick={onRestart}
+                  className="flex-1 py-3 rounded-xl bg-gold text-black font-bold hover:opacity-90 transition-opacity"
+                >
+                  Restart the Game
+                </motion.button>
+              )}
+              <motion.button
+                whileHover={{ scale: 1.04 }}
+                whileTap={{ scale: 0.96 }}
+                onClick={onBackToTitle}
+                className="flex-1 py-3 rounded-xl border border-white/20 text-white/60 font-semibold hover:border-white/40 hover:text-white/80 transition-colors"
+              >
+                ← Back to Title
+              </motion.button>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>

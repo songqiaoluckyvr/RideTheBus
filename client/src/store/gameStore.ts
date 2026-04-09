@@ -35,6 +35,8 @@ interface Store extends GameState, PlayerMeta {
 
   // Reset everything (new session)
   reset: () => void
+  // Reset game state only, keep player name/mode
+  restartSession: () => void
 }
 
 export const useGameStore = create<Store>((set) => ({
@@ -59,4 +61,6 @@ export const useGameStore = create<Store>((set) => ({
   newRound: () => set((s) => newRound(s)),
 
   reset: () => set({ ...createInitialState(), name: '', mode: 'casino', roomCode: null, isHost: false }),
-}))
+  restartSession: () => set((s) => ({ ...createInitialState(), name: s.name, mode: s.mode, roomCode: s.roomCode, isHost: s.isHost })),
+})
+)

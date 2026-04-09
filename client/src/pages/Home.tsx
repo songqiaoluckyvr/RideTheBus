@@ -15,10 +15,12 @@ export function Home() {
   const [mode, setMode] = useState<GameMode>('casino')
   const setPlayerName = useGameStore((s) => s.setPlayerName)
   const setMode_ = useGameStore((s) => s.setMode)
+  const reset = useGameStore((s) => s.reset)
   const navigate = useNavigate()
 
   const handleStart = () => {
     if (!name.trim()) return
+    reset()
     setPlayerName(name.trim())
     setMode_(mode)
     if (mode === 'casino') {
