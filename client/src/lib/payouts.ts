@@ -20,7 +20,7 @@ export function cumulativeMultiplier(stage: Stage): number {
 
 /** Payout given an initial bet and the stage you cash out on (1-indexed, already won) */
 export function calculatePayout(bet: number, stage: Stage): number {
-  return Math.floor(bet * cumulativeMultiplier(stage))
+  return Math.floor(bet * STAGE_MULTIPLIERS[stage])
 }
 
 /** What the player stands to win next if they continue */
