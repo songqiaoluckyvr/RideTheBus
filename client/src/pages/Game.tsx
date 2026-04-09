@@ -85,13 +85,6 @@ export function Game() {
               >
                 ← Go back to Title
               </button>
-              <div className="h-px bg-white/10" />
-              <button
-                onClick={() => window.close()}
-                className="w-full px-4 py-3 text-left text-sm text-red-400 hover:bg-red-900/20 hover:text-red-300 transition-colors"
-              >
-                ✕ Exit the Game
-              </button>
             </motion.div>
           )}
         </AnimatePresence>
