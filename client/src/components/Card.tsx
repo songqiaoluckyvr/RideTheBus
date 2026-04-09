@@ -66,19 +66,11 @@ export function Card({ card, revealed = false, size = 'md', shake = false }: Pro
         </div>
 
         {/* Card back */}
-        <div className="absolute inset-0 backface-hidden rotate-y-180 rounded-xl border-2 border-gold/60 bg-felt shadow-xl overflow-hidden">
-          <div className="w-full h-full flex items-center justify-center">
-            <div className="w-[85%] h-[85%] border-2 border-gold/40 rounded-lg flex items-center justify-center">
-              <span className="text-gold/60 font-display font-bold" style={{ fontSize: size === 'lg' ? '1.5rem' : '1rem' }}>
-                🦉
-              </span>
-            </div>
-          </div>
-          {/* Pattern overlay */}
-          <div className="absolute inset-0 opacity-10"
-            style={{
-              backgroundImage: 'repeating-linear-gradient(45deg, #d4af37 0px, #d4af37 1px, transparent 1px, transparent 8px)',
-            }}
+        <div className="absolute inset-0 backface-hidden rotate-y-180 rounded-xl overflow-hidden shadow-xl">
+          <img
+            src="/card-back.png"
+            alt="card back"
+            className="w-full h-full object-cover"
           />
         </div>
       </motion.div>
