@@ -2,7 +2,7 @@ import { createShuffledDeck } from './deck'
 import type { Card } from './deck'
 import type { Stage, AnyGuess, GuessResult } from './stages'
 import { evaluateGuess } from './stages'
-import { calculatePayout } from './payouts'
+import { calculatePayout, degradedMultiplier, STAGE_MULTIPLIERS } from './payouts'
 
 export type GamePhase =
   | 'idle'       // waiting for bet
@@ -20,7 +20,9 @@ export interface GameState {
   deck: Card[]
   revealedCards: Card[]    // cards drawn so far this round
   lastResult: GuessResult | null
-  roundPayout: number      // what player earned this round (0 if bust)
+  roundPayout: number
+  /** Effective (possibly degraded) multiplier locked in at the moment each stage was cleared */
+  lockedMultipliers: Partial<Record<Stage, number>>
   history: RoundRecord[]
 }
 
@@ -43,6 +45,7 @@ export function createInitialState(): GameState {
     revealedCards: [],
     lastResult: null,
     roundPayout: 0,
+    lockedMultipliers: {},
     history: [],
   }
 }
@@ -63,14 +66,15 @@ export function placeBet(state: GameState, amount: number): GameState {
     revealedCards: [],
     lastResult: null,
     roundPayout: 0,
+    lockedMultipliers: {},
   }
 }
 
-export function makeGuess(state: GameState, guess: AnyGuess): GameState {
+/** multiplierFactor: degradation factor at the moment of guess (1 = full, 0.5 = half profit) */
+export function makeGuess(state: GameState, guess: AnyGuess, multiplierFactor = 1): GameState {
   if (state.phase !== 'stage') return state
 
   const { currentStage, deck, revealedCards, bet } = state
-  // Draw the next card for this stage
   const cardIndex = currentStage - 1
   const newCard = deck[cardIndex]
   const newRevealed = [...revealedCards, newCard]
@@ -99,8 +103,11 @@ export function makeGuess(state: GameState, guess: AnyGuess): GameState {
   const nextStage = (currentStage + 1) as Stage
   const isFinalStage = currentStage === 5
 
+  const effectiveMult = degradedMultiplier(STAGE_MULTIPLIERS[currentStage as Stage], multiplierFactor)
+  const updatedLockedMultipliers = { ...state.lockedMultipliers, [currentStage]: effectiveMult }
+
   if (isFinalStage) {
-    const payout = calculatePayout(bet, 5)
+    const payout = calculatePayout(bet, 5, multiplierFactor)
     const record: RoundRecord = {
       bet,
       stagesCleared: 5,
@@ -114,6 +121,7 @@ export function makeGuess(state: GameState, guess: AnyGuess): GameState {
       lastResult: 'win',
       balance: state.balance - bet + payout,
       roundPayout: payout,
+      lockedMultipliers: updatedLockedMultipliers,
       history: [record, ...state.history].slice(0, 20),
     }
   }
@@ -124,7 +132,8 @@ export function makeGuess(state: GameState, guess: AnyGuess): GameState {
     currentStage: nextStage,
     revealedCards: newRevealed,
     lastResult: 'win',
-    roundPayout: calculatePayout(bet, currentStage),
+    roundPayout: calculatePayout(bet, currentStage, multiplierFactor),
+    lockedMultipliers: updatedLockedMultipliers,
   }
 }
 
@@ -133,10 +142,11 @@ export function continuePlaying(state: GameState): GameState {
   return { ...state, phase: 'stage', lastResult: null }
 }
 
+/** Payout is already locked in roundPayout (degraded at time of guess) */
 export function cashOut(state: GameState): GameState {
   if (state.phase !== 'cashout') return state
 
-  const payout = calculatePayout(state.bet, (state.currentStage - 1) as Stage)
+  const payout = state.roundPayout
   const record: RoundRecord = {
     bet: state.bet,
     stagesCleared: state.currentStage - 1,
@@ -153,11 +163,42 @@ export function cashOut(state: GameState): GameState {
   }
 }
 
+/**
+ * Timer expired — bust the player regardless of phase (stage or cashout).
+ * Draws the next card if in stage phase for visual feedback.
+ */
+export function forfeit(state: GameState): GameState {
+  if (state.phase !== 'stage' && state.phase !== 'cashout') return state
+
+  const { bet, currentStage, revealedCards } = state
+  const stagesCleared = state.phase === 'cashout' ? currentStage - 1 : currentStage - 1
+  const newRevealed = state.phase === 'stage'
+    ? [...revealedCards, state.deck[currentStage - 1]]
+    : revealedCards
+
+  const record: RoundRecord = {
+    bet,
+    stagesCleared,
+    payout: 0,
+    cashedOut: false,
+  }
+  return {
+    ...state,
+    phase: 'bust',
+    revealedCards: newRevealed,
+    lastResult: 'loss',
+    balance: state.balance - bet,
+    roundPayout: 0,
+    history: [record, ...state.history].slice(0, 20),
+  }
+}
+
 export function newRound(state: GameState): GameState {
   return {
     ...state,
     phase: 'idle',
     currentStage: 1,
+    lockedMultipliers: {},
     bet: 0,
     deck: [],
     revealedCards: [],

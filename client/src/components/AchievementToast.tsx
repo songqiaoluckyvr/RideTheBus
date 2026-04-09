@@ -18,7 +18,7 @@ export function AchievementToast({ show, stage, payout, onDone }: Props) {
 
   useEffect(() => {
     if (show) {
-      const t = setTimeout(onDone, 3500)
+      const t = setTimeout(onDone, 1500)
       return () => clearTimeout(t)
     }
   }, [show, onDone])
@@ -28,12 +28,13 @@ export function AchievementToast({ show, stage, payout, onDone }: Props) {
   return (
     <AnimatePresence>
       {show && (
+        <div className="fixed top-6 left-0 right-0 flex justify-center z-50 pointer-events-none">
         <motion.div
           initial={{ opacity: 0, y: -60, scale: 0.85 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: -40, scale: 0.9 }}
           transition={{ type: 'spring', stiffness: 300, damping: 22 }}
-          className="fixed top-6 left-1/2 -translate-x-1/2 z-50"
+          className="pointer-events-auto"
         >
           <div className="bg-felt-dark border-2 border-gold rounded-2xl px-8 py-5 shadow-2xl text-center min-w-[280px]">
             <motion.div
@@ -49,6 +50,7 @@ export function AchievementToast({ show, stage, payout, onDone }: Props) {
             <p className="text-gold/80 font-bold mt-2">${payout.toLocaleString()} payout</p>
           </div>
         </motion.div>
+        </div>
       )}
     </AnimatePresence>
   )

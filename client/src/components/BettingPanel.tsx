@@ -2,13 +2,16 @@ import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { calculatePayout } from '../lib/payouts'
 import type { Stage } from '../lib/stages'
+import type { GamePhase } from '../lib/engine'
 
 interface Props {
   balance: number
   currentBet: number
-  phase: string
+  phase: GamePhase
   currentStage: Stage
   roundPayout: number
+  /** Degradation factor from timer (1 = full multiplier, 0.5 = profit halved) */
+  multiplierFactor?: number
   onPlaceBet: (amount: number) => void
   onCashOut: () => void
   onContinue: () => void
@@ -31,6 +34,7 @@ export function BettingPanel({
   onNewRound,
   onBackToTitle,
   onRestart,
+  multiplierFactor = 1,
 }: Props) {
   const [betInput, setBetInput] = useState('')
 
@@ -41,12 +45,11 @@ export function BettingPanel({
     }
   }
 
-  const cashoutValue = phase === 'cashout'
-    ? calculatePayout(currentBet, (currentStage - 1) as Stage)
-    : 0
-  const nextValue = phase === 'cashout'
-    ? calculatePayout(currentBet, currentStage)
-    : 0
+  // roundPayout is already locked in with the degradation factor from the moment of guess
+  const cashoutValue = phase === 'cashout' ? roundPayout : 0
+  // Next stage always starts with a fresh timer (factor=1)
+  const nextValue = phase === 'cashout' ? calculatePayout(currentBet, currentStage) : 0
+  const isDegraded = cashoutValue > 0 && cashoutValue < calculatePayout(currentBet, (currentStage - 1) as Stage)
 
   return (
     <div className="flex flex-col gap-4 w-full max-w-md">
@@ -139,9 +142,13 @@ export function BettingPanel({
             animate={{ opacity: 1, scale: 1 }}
             className="flex flex-col gap-3"
           >
-            <div className="bg-black/30 rounded-xl border border-gold/30 p-4 text-center">
-              <p className="text-white/50 text-xs mb-1">Cash out now</p>
-              <p className="text-gold text-2xl font-display font-bold">${cashoutValue.toLocaleString()}</p>
+            <div className={`bg-black/30 rounded-xl border p-4 text-center transition-colors ${isDegraded ? 'border-yellow-500/40' : 'border-gold/30'}`}>
+              <p className="text-white/50 text-xs mb-1">
+                Cash out now{isDegraded && <span className="text-yellow-400 ml-1">({(multiplierFactor * 100).toFixed(0)}%)</span>}
+              </p>
+              <p className={`text-2xl font-display font-bold transition-colors ${isDegraded ? 'text-yellow-400' : 'text-gold'}`}>
+                ${cashoutValue.toLocaleString()}
+              </p>
               <p className="text-white/30 text-xs mt-1">
                 Next stage: <span className="text-white/60">${nextValue.toLocaleString()}</span>
               </p>
