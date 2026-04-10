@@ -9,7 +9,9 @@ const BUY_INS = [200, 400, 1000] as const
 
 export function Lobby() {
   const navigate = useNavigate()
-  const { setPlayerName } = useGameStore()
+  const { setPlayerName, mode: gameMode } = useGameStore()
+  const isBR = gameMode === 'battle-royale'
+  const modeLabel = isBR ? 'Battle Royale' : 'Tournament'
   const { lobbyPhase, room, roomError, tournamentPhase, setLobbyPhase, setRoomError, reset } =
     useTournamentStore()
   const socket = useSocket()
@@ -36,7 +38,7 @@ export function Lobby() {
   const handleCreate = () => {
     if (!name.trim()) return
     setPlayerName(name.trim())
-    socket.createRoom(name.trim(), 'tournament', selectedBuyIn)
+    socket.createRoom(name.trim(), gameMode as 'tournament' | 'battle-royale', selectedBuyIn)
   }
 
   const handleJoin = () => {
@@ -60,7 +62,7 @@ export function Lobby() {
       <div className="min-h-screen flex flex-col items-center justify-center gap-6 px-4 py-8">
         {/* Header */}
         <div className="text-center">
-          <h1 className="font-display text-gold text-3xl font-bold mb-1">Tournament Lobby</h1>
+          <h1 className="font-display text-gold text-3xl font-bold mb-1">{modeLabel} Lobby</h1>
           <div className="flex items-center gap-2 justify-center">
             <span className="text-white/40 text-sm">Room Code:</span>
             <button
@@ -100,9 +102,9 @@ export function Lobby() {
             </motion.div>
           ))}
 
-          {room.players.length < 4 && (
+          {room.players.length < (isBR ? 10 : 4) && (
             <div className="flex items-center justify-center border border-dashed border-white/10 rounded-xl py-3 text-white/20 text-sm">
-              Waiting for players ({room.players.length}/4)
+              Waiting for players ({room.players.length}/{isBR ? 10 : 4})
             </div>
           )}
         </div>
@@ -133,7 +135,7 @@ export function Lobby() {
               }`}
             >
               {allReady
-                ? 'Start Tournament 🚌'
+                ? `Start ${modeLabel} 🚌`
                 : `Waiting for all players to ready up (${room.players.filter((p) => p.ready).length}/${room.players.length})`}
             </motion.button>
           )}
@@ -174,7 +176,7 @@ export function Lobby() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center gap-6 px-4 py-8">
       <div className="text-center">
-        <h1 className="font-display text-gold text-3xl font-bold">Tournament</h1>
+        <h1 className="font-display text-gold text-3xl font-bold">{modeLabel}</h1>
       </div>
 
       {/* Name input */}

@@ -34,6 +34,7 @@ export function Tournament() {
   } = useTournamentStore()
 
   const devMode = useGameStore((s) => s.devMode)
+  const gameMode = useGameStore((s) => s.mode)
 
   // Guard: if no room (e.g. direct URL navigation), go back to lobby
   useEffect(() => {
@@ -125,6 +126,7 @@ export function Tournament() {
         config={config}
         roundNumber={roundNumber}
         peers={peerStatuses}
+        mode={gameMode}
         devMode={devMode}
         onGuess={handleGuess}
         onCashOut={handleCashOut}
@@ -143,6 +145,7 @@ export function Tournament() {
       config={config}
       leaderboard={leaderboard}
       peers={peerStatuses}
+      mode={gameMode}
       onBet={handleBet}
       hasPlacedBet={hasPlacedBet}
     />

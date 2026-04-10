@@ -12,6 +12,7 @@ interface Props {
   config: TournamentConfig
   leaderboard: LeaderboardEntry[]
   peers: PeerStatus[]
+  mode?: string
   onBet: (amount: number) => void
   hasPlacedBet: boolean
 }
@@ -23,9 +24,11 @@ export function TournamentBetting({
   config,
   leaderboard,
   peers,
+  mode = 'tournament',
   onBet,
   hasPlacedBet,
 }: Props) {
+  const isBR = mode === 'battle-royale'
   const maxBet = Math.min(myBalance, config.buyIn)
   const [sliderValue, setSliderValue] = useState(Math.floor(maxBet * 0.25))
   const [timeLeft, setTimeLeft] = useState(BET_TIMER_SECONDS)
@@ -40,7 +43,7 @@ export function TournamentBetting({
           clearInterval(interval)
           if (!timedOut.current) {
             timedOut.current = true
-            onBet(0) // auto-skip
+            onBet(isBR ? Math.floor(maxBet * 0.5) : 0)
           }
           return 0
         }
@@ -77,7 +80,7 @@ export function TournamentBetting({
       {/* Header */}
       <div className="w-full max-w-md text-center">
         <h2 className="font-display text-gold text-2xl font-bold">
-          Round {roundNumber} of {config.totalRounds}
+          Round {roundNumber}{config.totalRounds > 0 ? ` of ${config.totalRounds}` : ''}
         </h2>
         <p className="text-white/40 text-sm mt-1">
           Prize pool: <span className="text-gold font-semibold">${config.prizePool.toLocaleString()}</span>
@@ -192,18 +195,20 @@ export function TournamentBetting({
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.97 }}
                 onClick={() => handleBet(sliderValue)}
-                className="flex-1 py-3 rounded-xl bg-gold text-black font-bold text-base"
+                className={`py-3 rounded-xl bg-gold text-black font-bold text-base ${isBR ? 'w-full' : 'flex-1'}`}
               >
                 Bet ${sliderValue.toLocaleString()}
               </motion.button>
-              <motion.button
-                whileHover={{ scale: 1.03 }}
-                whileTap={{ scale: 0.97 }}
-                onClick={() => handleBet(0)}
-                className="px-5 py-3 rounded-xl border border-white/15 text-white/40 text-sm hover:border-white/30 transition-colors"
-              >
-                Skip
-              </motion.button>
+              {!isBR && (
+                <motion.button
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.97 }}
+                  onClick={() => handleBet(0)}
+                  className="px-5 py-3 rounded-xl border border-white/15 text-white/40 text-sm hover:border-white/30 transition-colors"
+                >
+                  Skip
+                </motion.button>
+              )}
             </div>
           </motion.div>
         ) : (

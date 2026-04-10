@@ -113,7 +113,8 @@ export function createRoom(
 
 export function joinRoom(code: string, playerId: string, playerName: string): GameRoom | null {
   const room = rooms.get(code)
-  if (!room || room.state !== 'waiting' || room.players.length >= 4) return null
+  const maxPlayers = room.mode === 'battle-royale' ? 10 : 4
+  if (!room || room.state !== 'waiting' || room.players.length >= maxPlayers) return null
   const buyIn = room.players[0].buyIn
   room.players.push({
     id: playerId,
@@ -188,7 +189,7 @@ export function initTournament(room: GameRoom): void {
 
   room.tournament = {
     config: {
-      totalRounds: 5,
+      totalRounds: room.mode === 'battle-royale' ? 0 : 5, // 0 = unlimited (BR)
       buyIn,
       prizePool,
       prizeMultiplier,

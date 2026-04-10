@@ -301,7 +301,11 @@ function _emitRoundEnd(room: ReturnType<typeof getRoom> & object, code: string) 
   if (!room || !room.tournament) return
   const prevBalances = (room as any)._prevBalances ?? {}
   const leaderboard = buildLeaderboard(room, prevBalances)
-  const isFinal = room.tournament.roundNumber >= room.tournament.config.totalRounds
+  const _isBR = room.mode === 'battle-royale'
+  const _allBroke = room.players.every((p) => p.balance <= 0)
+  const _soleSurvivor = room.players.filter((p) => p.balance > 0).length === 1
+  const isFinal = _allBroke || _soleSurvivor
+    || (!_isBR && room.tournament.roundNumber >= room.tournament.config.totalRounds)
 
   io.to(code).emit('round_leaderboard', {
     roundNumber: room.tournament.currentRound?.roundNumber,
@@ -314,9 +318,13 @@ function _emitRoundEnd(room: ReturnType<typeof getRoom> & object, code: string) 
     const current = getRoom(code)
     if (!current || !current.tournament) return
 
+    const isBR = current.mode === 'battle-royale'
     const allBroke = current.players.every((p) => p.balance <= 0)
+    const soleSurvivor = current.players.filter((p) => p.balance > 0).length === 1
+    const tournamentDone = !isBR && current.tournament.roundNumber >= current.tournament.config.totalRounds
+    const shouldEnd = allBroke || soleSurvivor || tournamentDone
 
-    if (isFinal || allBroke) {
+    if (shouldEnd) {
       finalizeTournament(current)
       const winnerId = current.tournament.winnerId
       io.to(code).emit('tournament_finished', {

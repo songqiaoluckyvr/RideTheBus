@@ -21,13 +21,13 @@ import { Card } from '../components/Card'
 const TIMER_CONFIG = {
   tournament:      { seconds: 30, type: 'bust'      as const, minFactor: 0.5 },
   'battle-royale': { seconds: 30, type: 'degrading' as const, minFactor: 0.5 },
-  'casino-hard':   { seconds: 30, type: 'degrading' as const, minFactor: 0.4 },
+  'casino-hard':   { seconds: 45, type: 'degrading' as const, minFactor: 0.4 },
 } as const
 
 type TimerType = 'bust' | 'degrading'
 
-/** Seconds at the start of each stage where the timer is frozen (reaction buffer). */
-const STAGE_GRACE_MS = 2000
+/** Grace period at game start only (not between stages). */
+const STAGE_GRACE_MS = 1000
 
 /**
  * Degradation starts immediately (DEGRADE_AFTER_SECONDS = 0).
@@ -94,17 +94,17 @@ export function Game() {
     }
   }, [phase, currentStage, timerEnabled, timerSeconds])
 
-  // ── Per-stage grace: freeze timer for STAGE_GRACE_MS on each stage entry ───
+  // ── Grace period at game start only (stage 1 entry) ────────────────────────
   useEffect(() => {
-    if (!timerEnabled || phase !== 'stage') return
+    if (!timerEnabled || phase !== 'stage' || currentStage !== 1) return
     setGraceActive(true)
     const timeout = setTimeout(() => setGraceActive(false), STAGE_GRACE_MS)
     return () => { clearTimeout(timeout); setGraceActive(false) }
-  }, [phase, timerEnabled])
+  }, [phase, currentStage, timerEnabled])
 
-  // ── Countdown — runs only during stage phase, after grace ──────────────────
+  // ── Countdown — runs during stage and cashout phases, after grace ───────────
   useEffect(() => {
-    if (!timerEnabled || phase !== 'stage' || graceActive) return
+    if (!timerEnabled || (phase !== 'stage' && phase !== 'cashout') || graceActive) return
     const interval = setInterval(() => {
       setTimeLeft((prev) => Math.max(0, prev - 1))
     }, 1000)
@@ -191,27 +191,23 @@ export function Game() {
             className="w-full max-w-2xl"
           >
             <div className="flex justify-between text-xs mb-1 px-0.5">
-              <span className={`uppercase tracking-widest ${phase === 'cashout' ? 'text-blue-400' : graceActive ? 'text-blue-400 animate-pulse' : 'text-white/40'}`}>
-                {phase === 'cashout'
-                  ? 'Paused'
-                  : graceActive
-                    ? 'Get ready…'
-                    : timerType === 'degrading' && factor < 1
-                      ? `Multiplier ${(factor * 100).toFixed(0)}%`
-                      : 'Time'}
+              <span className={`uppercase tracking-widest ${graceActive ? 'text-blue-400 animate-pulse' : 'text-white/40'}`}>
+                {graceActive
+                  ? 'Get ready…'
+                  : timerType === 'degrading' && factor < 1
+                    ? `Multiplier ${(factor * 100).toFixed(0)}%`
+                    : 'Time'}
               </span>
-              <span className={`font-bold tabular-nums ${phase === 'cashout' ? 'text-blue-400' : isRed ? 'text-red-400' : isYellow ? 'text-yellow-400' : 'text-white/60'}`}>
+              <span className={`font-bold tabular-nums ${isRed ? 'text-red-400' : isYellow ? 'text-yellow-400' : 'text-white/60'}`}>
                 {timeLeft}s
               </span>
             </div>
             <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
               <div
                 className={`h-full rounded-full ${
-                  phase === 'cashout'
-                    ? 'bg-blue-400'
-                    : graceActive
-                      ? 'animate-pulse bg-blue-400'
-                      : `transition-all duration-1000 ease-linear ${isRed ? 'bg-red-500' : isYellow ? 'bg-yellow-400' : 'bg-green-500'}`
+                  graceActive
+                    ? 'animate-pulse bg-blue-400'
+                    : `transition-all duration-1000 ease-linear ${isRed ? 'bg-red-500' : isYellow ? 'bg-yellow-400' : 'bg-green-500'}`
                 }`}
                 style={{ width: `${(timeLeft / timerSeconds) * 100}%` }}
               />
