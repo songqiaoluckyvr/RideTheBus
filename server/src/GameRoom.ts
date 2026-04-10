@@ -2,7 +2,7 @@ import { createShuffledDeck } from './lib/deck'
 import type { Card } from './lib/deck'
 import type { Stage, AnyGuess } from './lib/stages'
 import { evaluateGuess } from './lib/stages'
-import { calculatePayout, degradedMultiplier, STAGE_MULTIPLIERS } from './lib/payouts'
+import { calculatePayout, degradedMultiplier, roundMultiplier, STAGE_MULTIPLIERS } from './lib/payouts'
 
 export type RoomMode = 'tournament' | 'battle-royale'
 export type GamePhase = 'idle' | 'stage' | 'cashout' | 'bust' | 'complete'
@@ -295,7 +295,7 @@ export function processGuess(
     ps.status = 'done'
     ps.gamePhase = 'bust'
   } else {
-    const effectiveMult = degradedMultiplier(STAGE_MULTIPLIERS[stage as Stage], multiplierFactor)
+    const effectiveMult = roundMultiplier(degradedMultiplier(STAGE_MULTIPLIERS[stage as Stage], multiplierFactor))
     ps.lockedMultipliers = { ...ps.lockedMultipliers, [stage]: effectiveMult }
 
     const isFinal = stage === 5
