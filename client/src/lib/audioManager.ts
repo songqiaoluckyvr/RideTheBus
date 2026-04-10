@@ -64,9 +64,14 @@ class AudioManager {
     audio.play().catch(() => {/* autoplay blocked — user hasn't interacted yet */})
   }
 
-  startBgMusic(): void {
-    if (this.bgAudio) return
-    this.bgIndex = Math.floor(Math.random() * BG_MUSIC_FILES.length)
+  /** track: 1 = game play (bg-music-1), 2 = menus/lobby (bg-music-2) */
+  startBgMusic(track: 1 | 2 = 2): void {
+    const index = track - 1
+    // Already playing the right track — do nothing
+    if (this.bgAudio && this.bgIndex === index) return
+    // Switch tracks
+    this.stopBgMusic()
+    this.bgIndex = index
     this._playBgTrack()
   }
 
@@ -81,10 +86,7 @@ class AudioManager {
     const audio = new Audio(this.base() + BG_MUSIC_FILES[this.bgIndex])
     audio.volume = MUSIC_VOLUME
     audio.muted = this._muted
-    audio.onended = () => {
-      this.bgIndex = (this.bgIndex + 1) % BG_MUSIC_FILES.length
-      this._playBgTrack()
-    }
+    audio.onended = () => this._playBgTrack()
     audio.play().catch(() => {/* autoplay blocked */})
     this.bgAudio = audio
   }

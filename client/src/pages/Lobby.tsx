@@ -5,6 +5,7 @@ import { useGameStore } from '../store/gameStore'
 import { useTournamentStore } from '../store/tournamentStore'
 import { useSocket } from '../hooks/useSocket'
 import { uiImageUrl } from '../lib/cardAssets'
+import { audioManager } from '../lib/audioManager'
 
 const BUY_INS = [200, 400, 1000] as const
 
@@ -21,6 +22,11 @@ export function Lobby() {
   const [tab, setTab] = useState<'create' | 'join'>('create')
   const [selectedBuyIn, setSelectedBuyIn] = useState<number>(400)
   const [joinCode, setJoinCode] = useState('')
+
+  useEffect(() => {
+    audioManager.startBgMusic(2)
+    return () => audioManager.stopBgMusic()
+  }, [])
 
   // Navigate to tournament when game starts
   useEffect(() => {
