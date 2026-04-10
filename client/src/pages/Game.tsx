@@ -238,7 +238,7 @@ export function Game() {
       />
 
       {/* Header */}
-      <div className="w-full max-w-2xl flex items-start justify-between relative">
+      <div className="w-full max-w-2xl grid grid-cols-3 items-center relative z-40">
         <div className="flex gap-2">
           <button
             onClick={() => navigate('/')}
@@ -265,7 +265,7 @@ export function Game() {
             )}
           </button>
         </div>
-        <h1 className="font-display font-bold text-gold text-3xl absolute left-1/2 -translate-x-1/2">Ride the Bus</h1>
+        <img src={uiImageUrl('title')} alt="Ride the Bus" className="h-16 w-auto mx-auto" />
         <div className="text-right">
           <p className="text-white/40 text-xs">Current balance:</p>
           <p className="text-gold font-bold text-xl">${balance.toLocaleString()}</p>
@@ -352,7 +352,7 @@ export function Game() {
       </div>
 
       {/* Stage prompt + betting panel in a layout-animated container */}
-      <div className="w-full max-w-2xl flex flex-col items-center gap-4 pb-4">
+      <div className="w-full max-w-2xl flex flex-col items-center gap-4 pb-4 relative z-40">
         <AnimatePresence>
           {stageForPrompt !== null && (
             <motion.div

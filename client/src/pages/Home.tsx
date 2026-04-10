@@ -73,9 +73,7 @@ export function Home() {
         transition={{ duration: 0.6, ease: 'easeOut' }}
         className="text-center"
       >
-        <h1 className="font-display font-black text-gold text-6xl md:text-7xl tracking-tight">
-          Ride the Bus
-        </h1>
+        <img src={uiImageUrl('title')} alt="Ride the Bus" className="w-72 md:w-96 mx-auto" />
         <p className="text-white/40 mt-2 text-sm tracking-widest uppercase">Are you luckier than the casino?</p>
       </motion.div>
 
