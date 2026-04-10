@@ -9,7 +9,7 @@ export function HistoryLog({ history }: Props) {
   const slots = Array.from({ length: 3 }, (_, i) => history[i] ?? null)
 
   return (
-    <div className="w-full max-w-xs">
+    <div className="w-full max-w-md">
       <h3 className="text-white/40 text-xs font-semibold uppercase tracking-widest mb-2 text-center">Last 3 rounds</h3>
       <div className="flex flex-col gap-1.5">
         {slots.map((r, i) => (
