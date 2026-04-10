@@ -26,12 +26,16 @@ import {
 import type { AnyGuess } from './lib/stages'
 
 const app = express()
-app.use(cors({ origin: /^http:\/\/localhost(:\d+)?$/ }))
+const ALLOWED_ORIGINS = [
+  /^http:\/\/localhost(:\d+)?$/,
+  'https://songqiaoluckyvr.github.io',
+]
+app.use(cors({ origin: ALLOWED_ORIGINS }))
 app.use(express.json())
 
 const httpServer = createServer(app)
 const io = new Server(httpServer, {
-  cors: { origin: /^http:\/\/localhost(:\d+)?$/, methods: ['GET', 'POST'] },
+  cors: { origin: ALLOWED_ORIGINS, methods: ['GET', 'POST'] },
 })
 
 app.get('/health', (_req, res) => res.json({ ok: true }))

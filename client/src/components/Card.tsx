@@ -78,7 +78,7 @@ export function Card({ card, revealed = false, size = 'md', shake = false }: Pro
         {/* Card back */}
         <div className="absolute inset-0 backface-hidden rotate-y-180 rounded-xl overflow-hidden shadow-xl">
           <img
-            src="/card-back.png"
+            src={`${import.meta.env.BASE_URL}card-back.png`}
             alt="card back"
             className="w-full h-full object-cover"
           />
