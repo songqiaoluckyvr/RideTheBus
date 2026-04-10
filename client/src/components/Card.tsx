@@ -13,9 +13,9 @@ interface Props {
 }
 
 const SIZE = {
-  sm: 'w-16 h-24',
-  md: 'w-24 h-32',
-  lg: 'w-32 h-44',
+  sm: 'w-12 md:w-16 aspect-[3/4]',
+  md: 'w-14 md:w-24 aspect-[3/4]',
+  lg: 'w-20 md:w-32 aspect-[3/4]',
 }
 
 
