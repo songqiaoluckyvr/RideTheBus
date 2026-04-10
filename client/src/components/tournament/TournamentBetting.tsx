@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { PlayerStatusList } from './PlayerStatusList'
 import type { LeaderboardEntry, PeerStatus, TournamentConfig } from '../../store/tournamentStore'
+import { uiImageUrl } from '../../lib/cardAssets'
 
 const BET_TIMER_SECONDS = 20
 
@@ -73,7 +74,11 @@ export function TournamentBetting({
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-start gap-5 px-4 py-8">
+    <div className="min-h-screen flex flex-col items-center justify-start gap-5 px-4 py-8 relative overflow-hidden">
+      <img src={uiImageUrl('background')} alt="" aria-hidden className="fixed inset-0 w-full h-full object-cover -z-10" />
+      <div className="fixed top-0 bottom-0 left-1/2 -translate-x-1/2 w-full max-w-xl -z-[1] pointer-events-none">
+        <img src={uiImageUrl('table-felt')} alt="" aria-hidden className="w-full h-full object-cover opacity-95" />
+      </div>
       {/* Header */}
       <div className="w-full max-w-md text-center">
         <h2 className="font-display text-gold text-2xl font-bold">

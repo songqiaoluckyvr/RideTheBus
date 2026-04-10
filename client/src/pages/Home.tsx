@@ -4,6 +4,7 @@ import { motion } from 'framer-motion'
 import { useGameStore } from '../store/gameStore'
 import type { GameMode } from '../store/gameStore'
 import { DEV_MODE_ENABLED } from '../config'
+import { uiImageUrl } from '../lib/cardAssets'
 
 const CASINO_MODES: { id: GameMode; label: string; desc: string }[] = [
   { id: 'casino', label: '🎰 Normal', desc: 'No timer, take your time to win the jackpot!' },
@@ -35,6 +36,18 @@ export function Home() {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-4 gap-8 relative">
+      {/* Background art */}
+      <img
+        src={uiImageUrl('background')}
+        alt=""
+        aria-hidden
+        className="fixed inset-0 w-full h-full object-cover -z-10"
+      />
+
+      {/* Table felt — scoped to the content column */}
+      <div className="fixed top-0 bottom-0 left-1/2 -translate-x-1/2 w-full max-w-lg -z-[1] pointer-events-none">
+        <img src={uiImageUrl('table-felt')} alt="" aria-hidden className="w-full h-full object-cover opacity-95" />
+      </div>
       {DEV_MODE_ENABLED && (
         <button
           onClick={() => setDevMode(!devMode)}

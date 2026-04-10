@@ -9,6 +9,8 @@ import { STAGE_MULTIPLIERS, degradedMultiplier, calculatePayout } from '../../li
 import type { Stage } from '../../lib/stages'
 import { DEV_MODE_ENABLED } from '../../config'
 import { Card } from '../Card'
+import { uiImageUrl } from '../../lib/cardAssets'
+import { audioManager } from '../../lib/audioManager'
 
 // ─── Timer configuration — bust only, no multiplier degradation ──────────────
 const TIMER_SECONDS = 30
@@ -52,6 +54,26 @@ export function TournamentRound({
   const isRed = pct <= 0.2
   const isYellow = !isRed && pct <= 0.5
 
+  // Background music
+  useEffect(() => {
+    audioManager.startBgMusic()
+    return () => audioManager.stopBgMusic()
+  }, [])
+
+  // Deck shuffle on new stage-1 entry
+  useEffect(() => {
+    if (gamePhase === 'stage' && currentStage === 1) {
+      audioManager.play('deck-shuffle')
+    }
+  }, [gamePhase, currentStage])
+
+  // Card deal sound on each reveal
+  useEffect(() => {
+    if (revealedCards.length > 0) {
+      audioManager.play('card-deal')
+    }
+  }, [revealedCards.length])
+
   // Flash on phase transition
   useEffect(() => {
     if (gamePhase === prevPhase) return
@@ -59,9 +81,11 @@ export function TournamentRound({
 
     if (gamePhase === 'cashout') {
       setShowFlash('win')
+      audioManager.play('win')
       setTimeout(() => setShowFlash(null), 600)
     } else if (gamePhase === 'bust') {
       setShowFlash('loss')
+      audioManager.play('lose')
       setShake(true)
       setTimeout(() => setShowFlash(null), 600)
       setTimeout(() => setShake(false), 500)
@@ -109,19 +133,45 @@ export function TournamentRound({
   return (
     <div className="min-h-screen flex flex-col items-center justify-between py-6 px-4 relative overflow-hidden">
 
+      {/* Background art */}
+      <img src={uiImageUrl('background')} alt="" aria-hidden className="fixed inset-0 w-full h-full object-cover -z-10" />
+      <div className="fixed top-0 bottom-0 left-1/2 -translate-x-1/2 w-full max-w-4xl -z-[1] pointer-events-none">
+        <img src={uiImageUrl('table-felt')} alt="" aria-hidden className="w-full h-full object-cover opacity-95" />
+      </div>
+
       {/* Win/loss flash */}
       <AnimatePresence>
         {showFlash && (
           <motion.div
             key={showFlash}
             initial={{ opacity: 0 }}
-            animate={{ opacity: 0.25 }}
+            animate={{ opacity: 0.2 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.15 }}
             className={`fixed inset-0 pointer-events-none z-40 ${
               showFlash === 'win' ? 'bg-green-400' : 'bg-red-600'
             }`}
           />
+        )}
+      </AnimatePresence>
+
+      {/* Win screen overlay */}
+      <AnimatePresence>
+        {gamePhase === 'complete' && (
+          <motion.img key="win-screen" src={uiImageUrl('win-screen')} alt="You win!"
+            initial={{ opacity: 0, scale: 1.05 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }}
+            transition={{ duration: 0.4 }}
+            className="fixed inset-0 w-full h-full object-contain pointer-events-none z-30" />
+        )}
+      </AnimatePresence>
+
+      {/* Game over screen overlay */}
+      <AnimatePresence>
+        {gamePhase === 'bust' && (
+          <motion.img key="gameover-screen" src={uiImageUrl('gameover-screen')} alt="Game over"
+            initial={{ opacity: 0, scale: 1.05 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }}
+            transition={{ duration: 0.4 }}
+            className="fixed inset-0 w-full h-full object-contain pointer-events-none z-30" />
         )}
       </AnimatePresence>
 
