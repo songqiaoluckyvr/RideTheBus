@@ -119,7 +119,7 @@ export function Home() {
           ) : <div />}
         </div>
 
-      {/* Title + subtitle + card suits + balance — grouped for tight spacing */}
+      {/* Title + subtitle + card suits */}
       <motion.div
         initial={{ opacity: 0, y: -30 }}
         animate={{ opacity: 1, y: 0 }}
@@ -133,11 +133,13 @@ export function Home() {
             <span key={s} className={`text-2xl ${s === '♥' || s === '♦' ? 'text-red-400' : 'text-white/70'}`}>{s}</span>
           ))}
         </div>
-        <div className="text-center">
-          <p className="text-white/40 text-xs uppercase tracking-widest">Your Balance</p>
-          <p className="text-gold font-display font-bold text-2xl">${balance.toLocaleString()}</p>
-        </div>
       </motion.div>
+
+      {/* Balance */}
+      <div className="text-center mb-2">
+        <p className="text-white/40 text-xs uppercase tracking-widest">Your Balance</p>
+        <p className="text-gold font-display font-bold text-2xl">${balance.toLocaleString()}</p>
+      </div>
 
       {/* Form */}
       <motion.div
