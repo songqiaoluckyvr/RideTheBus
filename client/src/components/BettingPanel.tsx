@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { calculatePayout } from '../lib/payouts'
 import type { Stage } from '../lib/stages'
@@ -26,8 +26,6 @@ interface Props {
   onRestart: () => void
 }
 
-const QUICK_BETS = [10, 50, 100, 250, 500]
-
 export function BettingPanel({
   balance,
   currentBet,
@@ -45,12 +43,16 @@ export function BettingPanel({
   stageMultipliers,
   fullScale = false,
 }: Props) {
-  const [betInput, setBetInput] = useState('')
+  const [sliderValue, setSliderValue] = useState(() => Math.max(1, Math.floor(balance * 0.25)))
+
+  // Keep slider in range if balance changes between rounds
+  useEffect(() => {
+    setSliderValue((prev) => Math.min(prev, balance))
+  }, [balance])
 
   const handleBet = (amount: number) => {
     if (amount > 0 && amount <= balance) {
       onPlaceBet(amount)
-      setBetInput('')
     }
   }
 
@@ -72,52 +74,62 @@ export function BettingPanel({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0 }}
-            className="flex flex-col gap-3"
+            className="flex flex-col gap-4"
           >
-            <p className="text-white/60 text-sm text-center">Place your bet to start</p>
-            {/* Quick bets */}
-            <div className="flex gap-2 flex-wrap justify-center">
-              {QUICK_BETS.filter((b) => b <= balance).map((b) => (
-                <motion.button
-                  key={b}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => handleBet(b)}
-                  className="w-16 py-2 rounded-lg bg-felt-light border border-gold/30 text-gold font-semibold text-sm hover:border-gold/70 transition-colors"
-                >
-                  ${b}
-                </motion.button>
-              ))}
-            </div>
-            {/* Custom input */}
-            <div className="flex gap-2">
+            {/* Slider */}
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center justify-between">
+                <span className="text-white/40 text-sm">Bet amount</span>
+                <span className="text-gold font-display font-bold text-2xl">
+                  ${sliderValue.toLocaleString()}
+                </span>
+              </div>
               <input
-                type="number"
+                type="range"
                 min={1}
                 max={balance}
-                placeholder="Custom amount"
-                value={betInput}
-                onChange={(e) => setBetInput(e.target.value)}
-                className="flex-1 bg-black/30 border border-white/20 rounded-xl px-4 py-2 text-white placeholder-white/30 focus:border-gold/60 focus:outline-none"
+                step={Math.max(1, Math.floor(balance / 100))}
+                value={sliderValue}
+                onChange={(e) => setSliderValue(Number(e.target.value))}
+                className="w-full accent-yellow-400 cursor-pointer"
               />
-              <motion.button
-                whileHover={{ scale: 1.04 }}
-                whileTap={{ scale: 0.96 }}
-                onClick={() => handleBet(Number(betInput))}
-                disabled={!betInput || Number(betInput) <= 0 || Number(betInput) > balance}
-                className="px-5 py-2 bg-gold text-black font-bold rounded-xl disabled:opacity-30"
-              >
-                Bet
-              </motion.button>
+              <div className="flex justify-between text-xs text-white/25">
+                <span>$1</span>
+                <span>${balance.toLocaleString()}</span>
+              </div>
             </div>
-            {/* All-in */}
+
+            {/* Quick % buttons */}
+            <div className="grid grid-cols-4 gap-2">
+              {[0.1, 0.25, 0.5, 1].map((frac) => {
+                const amount = Math.max(1, Math.floor(balance * frac))
+                const label = frac === 1 ? 'All In' : `${frac * 100}%`
+                return (
+                  <motion.button
+                    key={frac}
+                    whileHover={{ scale: 1.04 }}
+                    whileTap={{ scale: 0.96 }}
+                    onClick={() => setSliderValue(amount)}
+                    className={`py-2 rounded-lg border text-xs font-semibold transition-colors ${
+                      sliderValue === amount
+                        ? 'border-gold/70 bg-gold/10 text-gold'
+                        : 'border-white/15 text-white/40 hover:border-white/30'
+                    }`}
+                  >
+                    {label}
+                  </motion.button>
+                )
+              })}
+            </div>
+
+            {/* Confirm */}
             <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={() => handleBet(balance)}
-              className="py-2 rounded-xl border border-red-500/40 text-red-400 text-sm font-semibold hover:bg-red-900/20 transition-colors"
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
+              onClick={() => handleBet(sliderValue)}
+              className="py-3 rounded-xl bg-gold text-black font-bold text-base"
             >
-              ALL IN{'\u00A0\u00A0'}—{'\u00A0\u00A0'}${balance.toLocaleString()}
+              Bet ${sliderValue.toLocaleString()}
             </motion.button>
           </motion.div>
         )}
