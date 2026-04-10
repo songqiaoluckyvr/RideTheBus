@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import type { LeaderboardEntry } from '../../store/tournamentStore'
+import { uiImageUrl } from '../../lib/cardAssets'
 
 interface Props {
   myId: string
@@ -17,7 +18,11 @@ export function FinalResults({ myId, winnerId, winnerName, prize, leaderboard, o
   const noWinner = winnerId === null
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center gap-6 px-4 py-8">
+    <div className="min-h-screen flex flex-col items-center justify-center gap-6 px-4 py-8 relative overflow-hidden">
+      <img src={uiImageUrl('background')} alt="" aria-hidden className="fixed inset-0 w-full h-full object-cover -z-10" />
+      <div className="fixed top-0 bottom-0 left-1/2 -translate-x-1/2 w-full max-w-xl -z-[1] pointer-events-none">
+        <img src={uiImageUrl('table-felt')} alt="" aria-hidden className="w-full h-full object-cover opacity-95" />
+      </div>
       {/* Trophy */}
       <motion.div
         initial={{ scale: 0, rotate: -10 }}

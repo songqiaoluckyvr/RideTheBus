@@ -12,6 +12,8 @@ import { STAGE_MULTIPLIERS, HARD_STAGE_MULTIPLIERS, degradedMultiplier } from '.
 import type { Stage } from '../lib/stages'
 import { DEV_MODE_ENABLED } from '../config'
 import { Card } from '../components/Card'
+import { uiImageUrl } from '../lib/cardAssets'
+import { audioManager } from '../lib/audioManager'
 
 // ─── Timer configuration per mode ────────────────────────────────────────────
 // Global timer for the entire round — does NOT reset between stages.
@@ -69,10 +71,31 @@ export function Game() {
   // Degradation factor (recomputed on every render — timeLeft changes every second)
   const factor = computeFactor(timeLeft, timerSeconds, timerType, timerMinFactor)
 
+  // ── Background music: start on mount, stop on unmount ──────────────────────
+  useEffect(() => {
+    audioManager.startBgMusic()
+    return () => audioManager.stopBgMusic()
+  }, [])
+
+  // ── Deck shuffle sound on new round start ───────────────────────────────────
+  useEffect(() => {
+    if (phase === 'stage' && currentStage === 1) {
+      audioManager.play('deck-shuffle')
+    }
+  }, [phase, currentStage])
+
+  // ── Card deal sound whenever a new card is revealed ─────────────────────────
+  useEffect(() => {
+    if (revealedCards.length > 0) {
+      audioManager.play('card-deal')
+    }
+  }, [revealedCards.length])
+
   // ── Flash / shake on result ─────────────────────────────────────────────────
   useEffect(() => {
     if (lastResult === 'win') {
       setShowFlash('win')
+      audioManager.play('win')
       setTimeout(() => setShowFlash(null), 600)
       if ((phase === 'cashout' && currentStage === 5) || phase === 'complete') {
         setShowAchievement(true)
@@ -80,6 +103,7 @@ export function Game() {
     }
     if (phase === 'bust') {
       setShowFlash('loss')
+      audioManager.play('lose')
       setShake(true)
       setTimeout(() => setShowFlash(null), 600)
       setTimeout(() => setShake(false), 500)
@@ -127,6 +151,19 @@ export function Game() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-between py-3 px-4 relative overflow-hidden">
 
+      {/* Background art */}
+      <img
+        src={uiImageUrl('background')}
+        alt=""
+        aria-hidden
+        className="fixed inset-0 w-full h-full object-cover -z-10"
+      />
+
+      {/* Table felt — scoped to the play area column */}
+      <div className="fixed top-0 bottom-0 left-1/2 -translate-x-1/2 w-full max-w-4xl -z-[1] pointer-events-none">
+        <img src={uiImageUrl('table-felt')} alt="" aria-hidden className="w-full h-full object-cover opacity-95" />
+      </div>
+
       {/* Home button */}
       <button
         onClick={() => navigate('/')}
@@ -146,18 +183,50 @@ export function Game() {
         </div>
       )}
 
-      {/* Win/loss flash overlay */}
+      {/* Win/loss flash overlay (quick color pulse) */}
       <AnimatePresence>
         {showFlash && (
           <motion.div
             key={showFlash}
             initial={{ opacity: 0 }}
-            animate={{ opacity: 0.25 }}
+            animate={{ opacity: 0.2 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.15 }}
             className={`fixed inset-0 pointer-events-none z-40 ${
               showFlash === 'win' ? 'bg-green-400' : 'bg-red-600'
             }`}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Win screen image overlay */}
+      <AnimatePresence>
+        {phase === 'complete' && (
+          <motion.img
+            key="win-screen"
+            src={uiImageUrl('win-screen')}
+            alt="You win!"
+            initial={{ opacity: 0, scale: 1.05 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.4 }}
+            className="fixed inset-0 w-full h-full object-contain pointer-events-none z-30"
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Game over screen image overlay */}
+      <AnimatePresence>
+        {phase === 'bust' && (
+          <motion.img
+            key="gameover-screen"
+            src={uiImageUrl('gameover-screen')}
+            alt="Game over"
+            initial={{ opacity: 0, scale: 1.05 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.4 }}
+            className="fixed inset-0 w-full h-full object-contain pointer-events-none z-30"
           />
         )}
       </AnimatePresence>
@@ -271,7 +340,7 @@ export function Game() {
             >
               <StagePrompt
                 stage={stageForPrompt}
-                onGuess={(guess: AnyGuess) => makeGuess(guess, factor, stageMultipliers)}
+                onGuess={(guess: AnyGuess) => { audioManager.play('menu-select'); makeGuess(guess, factor, stageMultipliers) }}
                 disabled={phase !== 'stage'}
               />
             </motion.div>
@@ -287,7 +356,7 @@ export function Game() {
           multiplierFactor={factor}
           isDegradingMode={timerType === 'degrading'}
           stageMultipliers={stageMultipliers}
-          onPlaceBet={placeBet}
+          onPlaceBet={(amount) => { audioManager.play('chips-added'); placeBet(amount) }}
           onCashOut={cashOut}
           onContinue={() => { continuePlaying(); setShowAchievement(false) }}
           onNewRound={newRound}
