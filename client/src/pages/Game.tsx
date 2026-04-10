@@ -106,7 +106,11 @@ export function Game() {
       setShowFlash('win')
       audioManager.play('win')
       setTimeout(() => setShowFlash(null), 600)
-      if ((phase === 'cashout' && currentStage === 5) || phase === 'complete') {
+      if (phase === 'cashout' && currentStage === 5) {
+        setShowAchievement(true)
+        audioManager.play('joker-unlock')
+      }
+      if (phase === 'complete') {
         setShowAchievement(true)
         audioManager.play('joker-gold-unlock')
       }

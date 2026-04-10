@@ -214,7 +214,7 @@ export function BettingPanel({
               </div>
             )}
             <div className="flex gap-3 w-full">
-              {balance > 0 ? (
+              {balance > 0 && (
                 <motion.button
                   whileHover={{ scale: 1.04 }}
                   whileTap={{ scale: 0.96 }}
@@ -223,16 +223,6 @@ export function BettingPanel({
                   className="flex-1 py-3 rounded-xl bg-felt-light border border-gold/40 text-white font-bold hover:border-gold/80 transition-colors"
                 >
                   Play Again
-                </motion.button>
-              ) : (
-                <motion.button
-                  whileHover={{ scale: 1.04 }}
-                  whileTap={{ scale: 0.96 }}
-                  onMouseEnter={() => audioManager.play('mouse-over-2')}
-                  onClick={() => { audioManager.play('soft-click'); onRestart() }}
-                  className="flex-1 py-3 rounded-xl bg-gold text-black font-bold hover:opacity-90 transition-opacity"
-                >
-                  Restart the Game
                 </motion.button>
               )}
               <motion.button
