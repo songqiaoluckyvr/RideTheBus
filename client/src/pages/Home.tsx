@@ -24,10 +24,32 @@ export function Home() {
   const devMode = useGameStore((s) => s.devMode)
   const setDevMode = useGameStore((s) => s.setDevMode)
   const navigate = useNavigate()
+  const [muted, setMuted] = useState(audioManager.muted)
+
+  const toggleMute = () => {
+    const next = !muted
+    audioManager.setMuted(next)
+    setMuted(next)
+    // Profite de la gesture utilisateur pour démarrer la musique si elle n'a pas encore démarré
+    if (!next) audioManager.startBgMusic(2)
+  }
 
   useEffect(() => {
+    const startOnInteraction = () => {
+      audioManager.startBgMusic(2)
+      document.removeEventListener('click', startOnInteraction)
+      document.removeEventListener('keydown', startOnInteraction)
+    }
+    // Try immediately (works if user already interacted before this page)
     audioManager.startBgMusic(2)
-    return () => audioManager.stopBgMusic()
+    // Fallback: start on first interaction (browser autoplay policy)
+    document.addEventListener('click', startOnInteraction)
+    document.addEventListener('keydown', startOnInteraction)
+    return () => {
+      document.removeEventListener('click', startOnInteraction)
+      document.removeEventListener('keydown', startOnInteraction)
+      audioManager.stopBgMusic()
+    }
   }, [])
 
   const handleStart = () => {
@@ -41,7 +63,7 @@ export function Home() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-4 gap-8 relative">
+    <div className="min-h-screen flex flex-col items-center justify-start px-4 relative">
       {/* Background art */}
       <img
         src={uiImageUrl('background')}
@@ -54,18 +76,41 @@ export function Home() {
       <div className="fixed top-0 bottom-0 left-1/2 -translate-x-1/2 w-full max-w-lg -z-[1] pointer-events-none">
         <img src={uiImageUrl('table-felt')} alt="" aria-hidden className="w-full h-full object-cover opacity-95" />
       </div>
-      {DEV_MODE_ENABLED && (
-        <button
-          onClick={() => setDevMode(!devMode)}
-          className={`absolute top-4 right-4 px-3 py-1.5 text-xs rounded-lg border font-mono transition-colors ${
-            devMode
-              ? 'border-yellow-500/60 bg-yellow-500/10 text-yellow-400'
-              : 'border-white/10 bg-white/5 text-white/20 hover:text-white/40'
-          }`}
-        >
-          DEV {devMode ? 'ON' : 'OFF'}
-        </button>
-      )}
+      {/* Content column */}
+      <div className="w-full max-w-lg min-h-screen flex flex-col items-center gap-8 pt-10 pb-8">
+
+        {/* Top bar with buttons */}
+        <div className="w-full flex items-center justify-between px-4">
+          <button
+            onClick={toggleMute}
+            className={`w-10 h-10 flex items-center justify-center rounded-lg border transition-colors ${muted ? 'bg-white/5 border-white/10 text-white/30' : 'bg-white/5 border-white/10 text-white/70 hover:bg-white/10'}`}
+            title={muted ? 'Unmute' : 'Mute'}
+          >
+            {muted ? (
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5">
+                <path d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.707.707L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.707-3.707a1 1 0 011.09-.217zM12.293 7.293a1 1 0 011.414 0L15 8.586l1.293-1.293a1 1 0 111.414 1.414L16.414 10l1.293 1.293a1 1 0 01-1.414 1.414L15 11.414l-1.293 1.293a1 1 0 01-1.414-1.414L13.586 10l-1.293-1.293a1 1 0 010-1.414z" />
+              </svg>
+            ) : (
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
+                <path d="M19.952 1.651a.75.75 0 01.298.599V16.303a3 3 0 01-2.176 2.884l-1.32.377a2.553 2.553 0 11-1.403-4.909l2.311-.66a1.5 1.5 0 001.088-1.442V6.994l-9 2.572v9.737a3 3 0 01-2.176 2.884l-1.32.377a2.553 2.553 0 11-1.402-4.909l2.31-.66A1.5 1.5 0 008.25 15.5V5.251a.75.75 0 01.544-.721l10.5-3a.75.75 0 01.658.121z" />
+              </svg>
+            )}
+          </button>
+
+          {DEV_MODE_ENABLED ? (
+            <button
+              onClick={() => setDevMode(!devMode)}
+              className={`px-3 py-1.5 text-xs rounded-lg border font-mono transition-colors ${
+                devMode
+                  ? 'border-yellow-500/60 bg-yellow-500/10 text-yellow-400'
+                  : 'border-white/10 bg-white/5 text-white/20 hover:text-white/40'
+              }`}
+            >
+              DEV {devMode ? 'ON' : 'OFF'}
+            </button>
+          ) : <div />}
+        </div>
+
       {/* Title */}
       <motion.div
         initial={{ opacity: 0, y: -30 }}
@@ -172,6 +217,7 @@ export function Home() {
       </motion.div>
 
       <p className="text-white/20 text-xs">Starting balance: $1,000 · No registration required</p>
+      </div>
     </div>
   )
 }
