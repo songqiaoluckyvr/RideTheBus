@@ -119,9 +119,9 @@ export function useSocket() {
       store.setTournamentPhase('leaderboard')
     })
 
-    s.on('tournament_finished', (data: { leaderboard: typeof store.leaderboard; winnerId: string; winnerName: string; prize: number }) => {
+    s.on('tournament_finished', (data: { leaderboard: typeof store.leaderboard; winnerId: string | null; winnerIds: string[]; winnerName: string | null; winnerNames: string[]; prize: number }) => {
       store.setLeaderboard(data.leaderboard, true)
-      store.setWinner(data.winnerId, data.winnerName, data.prize)
+      store.setWinner(data.winnerId, data.winnerIds ?? [], data.winnerName, data.winnerNames ?? [], data.prize)
       store.setTournamentPhase('finished')
     })
 

@@ -326,12 +326,16 @@ function _emitRoundEnd(room: ReturnType<typeof getRoom> & object, code: string) 
 
     if (shouldEnd) {
       finalizeTournament(current)
-      const winnerId = current.tournament.winnerId
+      const { winnerIds } = current.tournament
       io.to(code).emit('tournament_finished', {
         leaderboard: current.tournament.finalLeaderboard,
-        winnerId,
-        winnerName: winnerId ? current.players.find((p) => p.id === winnerId)?.name ?? null : null,
-        prize: winnerId ? current.tournament.config.prizePool : 0,
+        winnerId: current.tournament.winnerId,
+        winnerIds,
+        winnerNames: winnerIds.map((id) => current.players.find((p) => p.id === id)?.name ?? 'Unknown'),
+        winnerName: winnerIds.length === 1
+          ? current.players.find((p) => p.id === winnerIds[0])?.name ?? null
+          : null,
+        prize: winnerIds.length > 0 ? current.tournament.config.prizePool : 0,
       })
     } else {
       const prevBals = Object.fromEntries(current.players.map((p) => [p.id, p.balance]))

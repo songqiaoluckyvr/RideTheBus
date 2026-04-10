@@ -82,7 +82,9 @@ interface TournamentStore {
 
   // End
   winnerId: string | null
+  winnerIds: string[]
   winnerName: string | null
+  winnerNames: string[]
   prize: number
 
   // Setters (called by useSocket listeners)
@@ -96,7 +98,7 @@ interface TournamentStore {
   setLeaderboard: (entries: LeaderboardEntry[], isFinal?: boolean, autoAdvanceMs?: number) => void
   setRoundNumber: (n: number) => void
   setConfig: (config: TournamentConfig) => void
-  setWinner: (id: string, name: string, prize: number) => void
+  setWinner: (winnerId: string | null, winnerIds: string[], winnerName: string | null, winnerNames: string[], prize: number) => void
   reset: () => void
 }
 
@@ -114,7 +116,9 @@ const initialState = {
   isFinalRound: false,
   autoAdvanceMs: 5000,
   winnerId: null,
+  winnerIds: [],
   winnerName: null,
+  winnerNames: [],
   prize: 0,
 }
 
@@ -136,6 +140,6 @@ export const useTournamentStore = create<TournamentStore>((set) => ({
   setLeaderboard: (leaderboard, isFinal = false, autoAdvanceMs = 5000) => set({ leaderboard, isFinalRound: isFinal, autoAdvanceMs }),
   setRoundNumber: (roundNumber) => set({ roundNumber }),
   setConfig: (config) => set({ config, totalRounds: config.totalRounds }),
-  setWinner: (winnerId, winnerName, prize) => set({ winnerId, winnerName, prize }),
+  setWinner: (winnerId, winnerIds, winnerName, winnerNames, prize) => set({ winnerId, winnerIds, winnerName, winnerNames, prize }),
   reset: () => set(initialState),
 }))

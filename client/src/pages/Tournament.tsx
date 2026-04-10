@@ -28,7 +28,9 @@ export function Tournament() {
     isFinalRound,
     autoAdvanceMs,
     winnerId,
+    winnerIds,
     winnerName,
+    winnerNames,
     prize,
     reset,
   } = useTournamentStore()
@@ -97,7 +99,9 @@ export function Tournament() {
       <FinalResults
         myId={myId}
         winnerId={winnerId}
+        winnerIds={winnerIds}
         winnerName={winnerName}
+        winnerNames={winnerNames}
         prize={prize}
         leaderboard={leaderboard}
         onPlayAgain={handlePlayAgain}

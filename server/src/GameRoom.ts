@@ -60,6 +60,7 @@ export interface TournamentState {
   roundNumber: number
   currentRound: TournamentRound | null
   winnerId: string | null
+  winnerIds: string[]
   finalLeaderboard: LeaderboardEntry[] | null
 }
 
@@ -198,6 +199,7 @@ export function initTournament(room: GameRoom): void {
     roundNumber: 0,
     currentRound: null,
     winnerId: null,
+    winnerIds: [],
     finalLeaderboard: null,
   }
   room.state = 'playing'
@@ -407,22 +409,32 @@ export function finalizeTournament(room: GameRoom): void {
   if (!room.tournament) return
 
   const sorted = [...room.players].sort((a, b) => b.balance - a.balance)
-  const winner = sorted[0]
+  const topBalance = sorted[0].balance
 
-  if (winner.balance > 0) {
-    // Normal finish — award prize to the leading player
-    room.tournament.winnerId = winner.id
-    winner.balance += room.tournament.config.prizePool
+  if (topBalance > 0) {
+    // Find all players tied at the top
+    const winners = sorted.filter((p) => p.balance === topBalance)
+    const prizePerWinner = Math.floor(room.tournament.config.prizePool / winners.length)
+
+    room.tournament.winnerIds = winners.map((p) => p.id)
+    room.tournament.winnerId = winners.length === 1 ? winners[0].id : null
+
+    for (const w of winners) {
+      w.balance += prizePerWinner
+    }
   } else {
     // Everyone went broke — no winner, prize not awarded
     room.tournament.winnerId = null
+    room.tournament.winnerIds = []
   }
 
-  room.tournament.finalLeaderboard = sorted.map((p, i) => ({
+  room.tournament.finalLeaderboard = sorted.map((p) => ({
     playerId: p.id,
     name: p.name,
     balance: p.balance,
-    roundDelta: i === 0 && room.tournament!.winnerId ? room.tournament!.config.prizePool : 0,
+    roundDelta: room.tournament!.winnerIds.includes(p.id)
+      ? Math.floor(room.tournament!.config.prizePool / room.tournament!.winnerIds.length)
+      : 0,
   }))
 
   room.state = 'finished'

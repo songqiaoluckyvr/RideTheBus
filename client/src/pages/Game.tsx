@@ -262,7 +262,7 @@ export function Game() {
             )}
           </button>
         </div>
-        <img src={uiImageUrl('title')} alt="Ride the Bus" className="h-16 w-auto mx-auto" />
+        <img src={uiImageUrl('title')} alt="Ride the Bus" className="h-32 w-auto mx-auto" />
         <div className="text-right">
           <p className="text-white/40 text-xs">Current balance:</p>
           <p className="text-gold font-bold text-xl">${balance.toLocaleString()}</p>

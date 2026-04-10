@@ -7,16 +7,19 @@ import { ScrollingBackground } from '../ScrollingBackground'
 interface Props {
   myId: string
   winnerId: string | null
+  winnerIds: string[]
   winnerName: string | null
+  winnerNames: string[]
   prize: number
   leaderboard: LeaderboardEntry[]
   onPlayAgain: () => void
 }
 
-export function FinalResults({ myId, winnerId, winnerName, prize, leaderboard, onPlayAgain }: Props) {
+export function FinalResults({ myId, winnerId, winnerIds, winnerName, winnerNames, prize, leaderboard, onPlayAgain }: Props) {
   const navigate = useNavigate()
-  const iWon = myId === winnerId
-  const noWinner = winnerId === null
+  const isTied = winnerIds.length > 1
+  const iWon = winnerIds.includes(myId)
+  const noWinner = winnerIds.length === 0
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center gap-6 px-4 py-8 relative overflow-hidden">
@@ -40,6 +43,16 @@ export function FinalResults({ myId, winnerId, winnerName, prize, leaderboard, o
             <h1 className="font-display text-white/60 text-3xl font-bold mb-2">Everyone went broke</h1>
             <p className="text-white/30 text-lg">No winner — the house wins</p>
           </>
+        ) : isTied && iWon ? (
+          <>
+            <h1 className="font-display text-gold text-4xl font-bold mb-2">Tie!</h1>
+            <p className="text-gold/70 text-xl">+${Math.floor(prize / winnerIds.length).toLocaleString()} prize (split {winnerIds.length} ways)</p>
+          </>
+        ) : isTied ? (
+          <>
+            <h1 className="font-display text-white text-3xl font-bold mb-2">Tie!</h1>
+            <p className="text-white/40 text-lg">{winnerNames.join(' & ')} split ${prize.toLocaleString()}</p>
+          </>
         ) : iWon ? (
           <>
             <h1 className="font-display text-gold text-4xl font-bold mb-2">You Won!</h1>
@@ -59,7 +72,7 @@ export function FinalResults({ myId, winnerId, winnerName, prize, leaderboard, o
       <div className="w-full max-w-sm flex flex-col gap-2">
         {leaderboard.map((entry, i) => {
           const isMe = entry.playerId === myId
-          const isWinner = entry.playerId === winnerId
+          const isWinner = winnerIds.includes(entry.playerId)
           return (
             <motion.div
               key={entry.playerId}
@@ -75,7 +88,14 @@ export function FinalResults({ myId, winnerId, winnerName, prize, leaderboard, o
               }`}
             >
               <span className="text-lg w-8 text-center">
-                {entry.balance <= 0 ? '' : i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `#${i + 1}`}
+                {(() => {
+                  if (entry.balance <= 0) return ''
+                  const rank = leaderboard.filter((e) => e.balance > entry.balance).length + 1
+                  if (rank === 1) return '🥇'
+                  if (rank === 2) return '🥈'
+                  if (rank === 3) return '🥉'
+                  return `#${rank}`
+                })()}
               </span>
               <div className="flex-1">
                 <p className={`font-semibold ${isWinner ? 'text-gold' : isMe ? 'text-white' : 'text-white/60'}`}>
