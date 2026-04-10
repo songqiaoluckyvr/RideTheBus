@@ -73,7 +73,7 @@ export function Game() {
 
   // ── Background music: start on mount, stop on unmount ──────────────────────
   useEffect(() => {
-    audioManager.startBgMusic()
+    audioManager.startBgMusic(1)
     return () => audioManager.stopBgMusic()
   }, [])
 

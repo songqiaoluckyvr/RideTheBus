@@ -1,10 +1,11 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useGameStore } from '../store/gameStore'
 import type { GameMode } from '../store/gameStore'
 import { DEV_MODE_ENABLED } from '../config'
 import { uiImageUrl } from '../lib/cardAssets'
+import { audioManager } from '../lib/audioManager'
 
 const CASINO_MODES: { id: GameMode; label: string; desc: string }[] = [
   { id: 'casino', label: '🎰 Normal', desc: 'No timer, take your time to win the jackpot!' },
@@ -23,6 +24,11 @@ export function Home() {
   const devMode = useGameStore((s) => s.devMode)
   const setDevMode = useGameStore((s) => s.setDevMode)
   const navigate = useNavigate()
+
+  useEffect(() => {
+    audioManager.startBgMusic(2)
+    return () => audioManager.stopBgMusic()
+  }, [])
 
   const handleStart = () => {
     reset()

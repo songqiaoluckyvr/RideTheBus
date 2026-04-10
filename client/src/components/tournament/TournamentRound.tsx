@@ -75,7 +75,7 @@ export function TournamentRound({
 
   // Background music
   useEffect(() => {
-    audioManager.startBgMusic()
+    audioManager.startBgMusic(2)
     return () => audioManager.stopBgMusic()
   }, [])
 
