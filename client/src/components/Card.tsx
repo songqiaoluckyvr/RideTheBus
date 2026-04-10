@@ -17,21 +17,29 @@ const SUIT_SYMBOL: Record<string, string> = {
 }
 
 const SIZE = {
-  sm: 'w-14 h-20 text-xs',
-  md: 'w-20 h-28 text-sm',
-  lg: 'w-28 h-40 text-base',
+  sm: 'w-14 h-20',
+  md: 'w-20 h-28',
+  lg: 'w-28 h-40',
 }
 
-const CORNER_SIZE = {
-  sm: 'text-xs',
-  md: 'text-sm',
-  lg: 'text-base',
+const CENTER_VALUE_SIZE = {
+  sm: 'text-2xl',
+  md: 'text-3xl',
+  lg: 'text-5xl',
+}
+
+const CORNER_SUIT_SIZE = {
+  sm: 'text-xl',   // center is text-2xl
+  md: 'text-2xl',  // center is text-3xl
+  lg: 'text-4xl',  // center is text-5xl
 }
 
 export function Card({ card, revealed = false, size = 'md', shake = false }: Props) {
   const sizeClass = SIZE[size]
-  const cornerClass = CORNER_SIZE[size]
+  const centerClass = CENTER_VALUE_SIZE[size]
+  const cornerSuitClass = CORNER_SUIT_SIZE[size]
   const isRed = card?.color === 'red'
+  const color = isRed ? 'text-red-600' : 'text-gray-900'
 
   return (
     <motion.div
@@ -46,20 +54,22 @@ export function Card({ card, revealed = false, size = 'md', shake = false }: Pro
         transition={{ duration: 0.5, ease: 'easeInOut' }}
       >
         {/* Card face */}
-        <div className="absolute inset-0 backface-hidden rounded-xl border-2 border-card-border bg-card-bg shadow-xl flex flex-col justify-between p-1.5">
+        <div className="absolute inset-0 backface-hidden rounded-xl border-2 border-card-border bg-card-bg shadow-xl">
           {card && (
             <>
-              <div className={`${cornerClass} font-bold leading-none ${isRed ? 'text-red-600' : 'text-gray-900'}`}>
-                <div>{card.value}</div>
-                <div>{SUIT_SYMBOL[card.suit]}</div>
-              </div>
-              <div className={`text-center font-bold ${isRed ? 'text-red-600' : 'text-gray-900'}`}
-                style={{ fontSize: size === 'lg' ? '2rem' : size === 'md' ? '1.5rem' : '1rem' }}>
+              {/* Top-left: suit symbol */}
+              <div className={`absolute top-1.5 left-1.5 ${cornerSuitClass} font-bold leading-none ${color}`}>
                 {SUIT_SYMBOL[card.suit]}
               </div>
-              <div className={`${cornerClass} font-bold leading-none text-right rotate-180 ${isRed ? 'text-red-600' : 'text-gray-900'}`}>
-                <div>{card.value}</div>
-                <div>{SUIT_SYMBOL[card.suit]}</div>
+
+              {/* Center: large value */}
+              <div className={`absolute inset-0 flex items-center justify-center ${centerClass} font-bold ${color}`}>
+                {card.value}
+              </div>
+
+              {/* Bottom-right: suit symbol */}
+              <div className={`absolute bottom-1.5 right-1.5 ${cornerSuitClass} font-bold leading-none ${color}`}>
+                {SUIT_SYMBOL[card.suit]}
               </div>
             </>
           )}
