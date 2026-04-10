@@ -8,7 +8,7 @@ import { BettingPanel } from '../components/BettingPanel'
 import { HistoryLog } from '../components/HistoryLog'
 import { AchievementToast } from '../components/AchievementToast'
 import type { AnyGuess } from '../lib/stages'
-import { STAGE_MULTIPLIERS, degradedMultiplier } from '../lib/payouts'
+import { STAGE_MULTIPLIERS, HARD_STAGE_MULTIPLIERS, degradedMultiplier } from '../lib/payouts'
 import type { Stage } from '../lib/stages'
 import { DEV_MODE_ENABLED } from '../config'
 import { Card } from '../components/Card'
@@ -16,10 +16,12 @@ import { Card } from '../components/Card'
 // ─── Timer configuration per mode ────────────────────────────────────────────
 // Global timer for the entire round — does NOT reset between stages.
 // Change seconds independently per mode without side effects.
+// ─── Timer configuration per mode ────────────────────────────────────────────
+// minFactor: floor of degradation (1.0 = no degradation, 0.0 = full loss of profit)
 const TIMER_CONFIG = {
-  tournament:      { seconds: 30, type: 'bust'      as const },
-  'battle-royale': { seconds: 30, type: 'degrading' as const }, // configurable per room in the future
-  'casino-hard':   { seconds: 30, type: 'degrading' as const }, // separate from battle-royale
+  tournament:      { seconds: 30, type: 'bust'      as const, minFactor: 0.5 },
+  'battle-royale': { seconds: 30, type: 'degrading' as const, minFactor: 0.5 },
+  'casino-hard':   { seconds: 30, type: 'degrading' as const, minFactor: 0.4 },
 } as const
 
 type TimerType = 'bust' | 'degrading'
@@ -28,17 +30,17 @@ type TimerType = 'bust' | 'degrading'
 const STAGE_GRACE_MS = 2000
 
 /**
- * Degradation starts after DEGRADE_AFTER_SECONDS have elapsed from full timer.
- * factor 1.0 → full multiplier | factor 0.5 → profit halved (at 1 s remaining).
+ * Degradation starts immediately (DEGRADE_AFTER_SECONDS = 0).
+ * factor 1.0 → full multiplier | factor minFactor → profit reduced at 1s remaining.
  */
 const DEGRADE_AFTER_SECONDS = 0
 
-function computeFactor(timeLeft: number, timerSeconds: number, type: TimerType): number {
+function computeFactor(timeLeft: number, timerSeconds: number, type: TimerType, minFactor = 0.5): number {
   if (type !== 'degrading') return 1
   const degradeFrom = timerSeconds - DEGRADE_AFTER_SECONDS
   if (timeLeft >= degradeFrom) return 1.0
-  if (timeLeft <= 0) return 0.5
-  return 1.0 - ((degradeFrom - timeLeft) / (degradeFrom - 1)) * 0.5
+  if (timeLeft <= 0) return minFactor
+  return 1.0 - ((degradeFrom - timeLeft) / (degradeFrom - 1)) * (1.0 - minFactor)
 }
 
 export function Game() {
@@ -54,15 +56,18 @@ export function Game() {
   const [shake, setShake] = useState(false)
 
   // Timer state
+  const stageMultipliers = mode === 'casino-hard' ? HARD_STAGE_MULTIPLIERS : STAGE_MULTIPLIERS
+
   const timerConfig = TIMER_CONFIG[mode as keyof typeof TIMER_CONFIG]
   const timerEnabled = !!timerConfig
   const timerSeconds = timerConfig?.seconds ?? 30
   const timerType: TimerType = timerConfig?.type ?? 'bust'
+  const timerMinFactor: number = timerConfig?.minFactor ?? 0.5
   const [timeLeft, setTimeLeft] = useState<number>(timerSeconds)
   const [graceActive, setGraceActive] = useState(false)
 
   // Degradation factor (recomputed on every render — timeLeft changes every second)
-  const factor = computeFactor(timeLeft, timerSeconds, timerType)
+  const factor = computeFactor(timeLeft, timerSeconds, timerType, timerMinFactor)
 
   // ── Flash / shake on result ─────────────────────────────────────────────────
   useEffect(() => {
@@ -81,10 +86,12 @@ export function Game() {
     }
   }, [lastResult, phase, currentStage])
 
-  // ── Reset global timer only at the start of a new round (stage 1) ──────────
+  // ── Reset global timer on idle (new round) or at the start of stage 1 ───────
   useEffect(() => {
-    if (!timerEnabled || phase !== 'stage' || currentStage !== 1) return
-    setTimeLeft(timerSeconds)
+    if (!timerEnabled) return
+    if (phase === 'idle' || (phase === 'stage' && currentStage === 1)) {
+      setTimeLeft(timerSeconds)
+    }
   }, [phase, currentStage, timerEnabled, timerSeconds])
 
   // ── Per-stage grace: freeze timer for STAGE_GRACE_MS on each stage entry ───
@@ -224,8 +231,8 @@ export function Game() {
           const rawMult = locked !== undefined
             ? locked
             : timerType === 'degrading'
-              ? degradedMultiplier(STAGE_MULTIPLIERS[s as Stage], factor)
-              : STAGE_MULTIPLIERS[s as Stage]
+              ? degradedMultiplier(stageMultipliers[s as Stage], factor)
+              : stageMultipliers[s as Stage]
           const displayMult = Number.isInteger(rawMult) ? rawMult : (Math.floor(rawMult * 10) / 10).toFixed(1)
           return (
             <div
@@ -268,7 +275,7 @@ export function Game() {
             >
               <StagePrompt
                 stage={stageForPrompt}
-                onGuess={(guess: AnyGuess) => makeGuess(guess, factor)}
+                onGuess={(guess: AnyGuess) => makeGuess(guess, factor, stageMultipliers)}
                 disabled={phase !== 'stage'}
               />
             </motion.div>
@@ -283,6 +290,7 @@ export function Game() {
           roundPayout={roundPayout}
           multiplierFactor={factor}
           isDegradingMode={timerType === 'degrading'}
+          stageMultipliers={stageMultipliers}
           onPlaceBet={placeBet}
           onCashOut={cashOut}
           onContinue={() => { continuePlaying(); setShowAchievement(false) }}

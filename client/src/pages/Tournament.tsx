@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useGameStore } from '../store/gameStore'
 import { useTournamentStore } from '../store/tournamentStore'
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 // (useTournamentStore used both as hook and for direct getState access)
@@ -32,6 +33,8 @@ export function Tournament() {
     reset,
   } = useTournamentStore()
 
+  const devMode = useGameStore((s) => s.devMode)
+
   // Guard: if no room (e.g. direct URL navigation), go back to lobby
   useEffect(() => {
     if (!room) navigate('/lobby')
@@ -41,7 +44,9 @@ export function Tournament() {
 
   const myId = socket.myId
   const myPlayer = room.players.find((p) => p.id === myId)
-  const myBalance = myPlayer?.balance ?? 0
+  // Leaderboard balance is kept up-to-date after each round; room.players is not
+  const myLeaderboardEntry = leaderboard.find((e) => e.playerId === myId)
+  const myBalance = myLeaderboardEntry?.balance ?? myPlayer?.balance ?? 0
   const code = room.code
 
   // ─── Handlers ───────────────────────────────────────────────────────────────
@@ -60,6 +65,10 @@ export function Tournament() {
 
   const handleContinue = () => {
     socket.continuePlaying(code)
+  }
+
+  const handleForfeit = () => {
+    socket.forfeit(code)
   }
 
   const handlePlayAgain = () => {
@@ -116,9 +125,11 @@ export function Tournament() {
         config={config}
         roundNumber={roundNumber}
         peers={peerStatuses}
+        devMode={devMode}
         onGuess={handleGuess}
         onCashOut={handleCashOut}
         onContinue={handleContinue}
+        onForfeit={handleForfeit}
       />
     )
   }

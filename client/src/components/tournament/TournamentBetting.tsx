@@ -26,7 +26,8 @@ export function TournamentBetting({
   onBet,
   hasPlacedBet,
 }: Props) {
-  const [sliderValue, setSliderValue] = useState(Math.floor(myBalance * 0.25))
+  const maxBet = Math.min(myBalance, config.buyIn)
+  const [sliderValue, setSliderValue] = useState(Math.floor(maxBet * 0.25))
   const [timeLeft, setTimeLeft] = useState(BET_TIMER_SECONDS)
   const timedOut = useRef(false)
 
@@ -49,10 +50,17 @@ export function TournamentBetting({
     return () => clearInterval(interval)
   }, [hasPlacedBet, onBet])
 
-  // Keep slider in range if balance changes
+  // Keep slider in range if effective max changes
   useEffect(() => {
-    setSliderValue((prev) => Math.min(prev, myBalance))
-  }, [myBalance])
+    setSliderValue((prev) => Math.min(prev, maxBet))
+  }, [maxBet])
+
+  // Auto-skip when balance is 0
+  useEffect(() => {
+    if (myBalance === 0 && !hasPlacedBet) {
+      onBet(0)
+    }
+  }, [myBalance, hasPlacedBet, onBet])
 
   const pct = timeLeft / BET_TIMER_SECONDS
   const isRed = pct <= 0.25
@@ -94,10 +102,9 @@ export function TournamentBetting({
               </span>
             </div>
             <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
-              <motion.div
-                className={`h-full rounded-full transition-colors duration-300 ${isRed ? 'bg-red-500' : isYellow ? 'bg-yellow-400' : 'bg-green-500'}`}
+              <div
+                className={`h-full rounded-full transition-all duration-1000 ease-linear ${isRed ? 'bg-red-500' : isYellow ? 'bg-yellow-400' : 'bg-green-500'}`}
                 style={{ width: `${pct * 100}%` }}
-                transition={{ duration: 1, ease: 'linear' }}
               />
             </div>
           </motion.div>
@@ -144,22 +151,22 @@ export function TournamentBetting({
               <input
                 type="range"
                 min={1}
-                max={myBalance}
-                step={Math.max(1, Math.floor(myBalance / 100))}
+                max={maxBet}
+                step={Math.max(1, Math.floor(maxBet / 100))}
                 value={sliderValue}
                 onChange={(e) => setSliderValue(Number(e.target.value))}
                 className="w-full accent-yellow-400 cursor-pointer"
               />
               <div className="flex justify-between text-xs text-white/25">
                 <span>$1</span>
-                <span>${myBalance.toLocaleString()}</span>
+                <span>${maxBet.toLocaleString()}</span>
               </div>
             </div>
 
             {/* Quick % buttons */}
             <div className="grid grid-cols-4 gap-2">
               {[0.1, 0.25, 0.5, 1].map((frac) => {
-                const amount = Math.floor(myBalance * frac)
+                const amount = Math.floor(maxBet * frac)
                 const label = frac === 1 ? 'All In' : `${frac * 100}%`
                 return (
                   <motion.button

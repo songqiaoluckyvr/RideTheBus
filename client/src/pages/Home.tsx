@@ -16,9 +16,7 @@ const MULTI_MODES: { id: GameMode; label: string; desc: string }[] = [
 ]
 
 export function Home() {
-  const [name, setName] = useState('')
   const [mode, setMode] = useState<GameMode>('casino')
-  const setPlayerName = useGameStore((s) => s.setPlayerName)
   const setMode_ = useGameStore((s) => s.setMode)
   const reset = useGameStore((s) => s.reset)
   const devMode = useGameStore((s) => s.devMode)
@@ -26,9 +24,7 @@ export function Home() {
   const navigate = useNavigate()
 
   const handleStart = () => {
-    if (!name.trim()) return
     reset()
-    setPlayerName(name.trim())
     setMode_(mode)
     if (mode === 'casino' || mode === 'casino-hard') {
       navigate('/game')
@@ -91,21 +87,6 @@ export function Home() {
         transition={{ delay: 0.35 }}
         className="w-full max-w-sm flex flex-col gap-4"
       >
-        {/* Name input */}
-        <div className="flex flex-col gap-1.5">
-          <label className="text-white/50 text-xs uppercase tracking-widest">Your Name</label>
-          <input
-            type="text"
-            maxLength={20}
-            placeholder="Enter your name..."
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleStart()}
-            className="bg-black/30 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-white/25 focus:border-gold/60 focus:outline-none text-base"
-            autoFocus
-          />
-        </div>
-
         {/* Mode select */}
         <div className="flex flex-col gap-3">
           <label className="text-white/50 text-xs uppercase tracking-widest">Game Mode</label>
@@ -181,8 +162,7 @@ export function Home() {
           whileHover={{ scale: 1.03 }}
           whileTap={{ scale: 0.97 }}
           onClick={handleStart}
-          disabled={!name.trim()}
-          className="py-4 rounded-xl bg-gold text-black font-display font-bold text-lg disabled:opacity-30 disabled:cursor-not-allowed mt-1"
+          className="py-4 rounded-xl bg-gold text-black font-display font-bold text-lg mt-1"
         >
           Let's Ride →
         </motion.button>

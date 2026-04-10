@@ -14,6 +14,8 @@ interface Props {
   multiplierFactor?: number
   /** True for modes where the multiplier degrades over time */
   isDegradingMode?: boolean
+  /** Active multiplier table for the current game mode */
+  stageMultipliers?: Record<Stage, number>
   onPlaceBet: (amount: number) => void
   onCashOut: () => void
   onContinue: () => void
@@ -38,6 +40,7 @@ export function BettingPanel({
   onRestart,
   multiplierFactor = 1,
   isDegradingMode = false,
+  stageMultipliers,
 }: Props) {
   const [betInput, setBetInput] = useState('')
 
@@ -51,8 +54,8 @@ export function BettingPanel({
   // roundPayout is already locked in with the degradation factor from the moment of guess
   const cashoutValue = phase === 'cashout' ? roundPayout : 0
   // Next stage max = current factor (timer is global, doesn't reset between stages)
-  const nextValue = phase === 'cashout' ? calculatePayout(currentBet, currentStage, multiplierFactor) : 0
-  const isDegraded = cashoutValue > 0 && cashoutValue < calculatePayout(currentBet, (currentStage - 1) as Stage)
+  const nextValue = phase === 'cashout' ? calculatePayout(currentBet, currentStage, multiplierFactor, stageMultipliers) : 0
+  const isDegraded = cashoutValue > 0 && cashoutValue < calculatePayout(currentBet, (currentStage - 1) as Stage, 1, stageMultipliers)
 
   return (
     <div className="flex flex-col gap-4 w-full max-w-md">
@@ -181,7 +184,7 @@ export function BettingPanel({
           >
             {phase === 'bust' ? (
               <div className="text-center">
-                <p className="text-red-400 text-lg font-bold">Bust! 💥</p>
+                <p className="text-red-400 text-lg font-bold">Game Over</p>
                 <p className="text-white/50 text-sm">You lost ${currentBet}</p>
               </div>
             ) : (
@@ -198,7 +201,7 @@ export function BettingPanel({
                   onClick={onNewRound}
                   className="flex-1 py-3 rounded-xl bg-felt-light border border-gold/40 text-white font-bold hover:border-gold/80 transition-colors"
                 >
-                  Continue to Play
+                  Play Again
                 </motion.button>
               ) : (
                 <motion.button

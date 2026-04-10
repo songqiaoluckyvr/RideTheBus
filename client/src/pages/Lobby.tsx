@@ -9,11 +9,12 @@ const BUY_INS = [200, 400, 1000] as const
 
 export function Lobby() {
   const navigate = useNavigate()
-  const { name } = useGameStore()
+  const { setPlayerName } = useGameStore()
   const { lobbyPhase, room, roomError, tournamentPhase, setLobbyPhase, setRoomError, reset } =
     useTournamentStore()
   const socket = useSocket()
 
+  const [name, setName] = useState(() => localStorage.getItem('rtb_player_name') ?? '')
   const [tab, setTab] = useState<'create' | 'join'>('create')
   const [selectedBuyIn, setSelectedBuyIn] = useState<number>(400)
   const [joinCode, setJoinCode] = useState('')
@@ -33,13 +34,15 @@ export function Lobby() {
   }, [roomError, setRoomError])
 
   const handleCreate = () => {
-    if (!name) return
-    socket.createRoom(name, 'tournament', selectedBuyIn)
+    if (!name.trim()) return
+    setPlayerName(name.trim())
+    socket.createRoom(name.trim(), 'tournament', selectedBuyIn)
   }
 
   const handleJoin = () => {
-    if (!name || !joinCode) return
-    socket.joinRoom(joinCode.toUpperCase(), name)
+    if (!name.trim() || !joinCode) return
+    setPlayerName(name.trim())
+    socket.joinRoom(joinCode.toUpperCase(), name.trim())
   }
 
   const handleBack = () => {
@@ -171,8 +174,21 @@ export function Lobby() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center gap-6 px-4 py-8">
       <div className="text-center">
-        <h1 className="font-display text-gold text-3xl font-bold mb-1">Tournament</h1>
-        <p className="text-white/40 text-sm">Welcome, {name}</p>
+        <h1 className="font-display text-gold text-3xl font-bold">Tournament</h1>
+      </div>
+
+      {/* Name input */}
+      <div className="flex flex-col gap-1.5 w-full max-w-sm">
+        <label className="text-white/50 text-xs uppercase tracking-widest">Your Name</label>
+        <input
+          type="text"
+          maxLength={20}
+          placeholder="Enter your name..."
+          value={name}
+          onChange={(e) => { setName(e.target.value); localStorage.setItem('rtb_player_name', e.target.value) }}
+          className="bg-black/30 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-white/25 focus:border-gold/60 focus:outline-none text-base"
+          autoFocus
+        />
       </div>
 
       {/* Tab toggle */}
@@ -222,8 +238,8 @@ export function Lobby() {
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.97 }}
               onClick={handleCreate}
-              disabled={!name}
-              className="py-3 rounded-xl bg-gold text-black font-bold text-lg disabled:opacity-30"
+              disabled={!name.trim()}
+              className="py-3 rounded-xl bg-gold text-black font-bold text-lg disabled:opacity-30 disabled:cursor-not-allowed"
             >
               Create Room
             </motion.button>
@@ -249,8 +265,8 @@ export function Lobby() {
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.97 }}
               onClick={handleJoin}
-              disabled={!name || joinCode.length < 5}
-              className="py-3 rounded-xl bg-gold text-black font-bold text-lg disabled:opacity-30"
+              disabled={!name.trim() || joinCode.length < 5}
+              className="py-3 rounded-xl bg-gold text-black font-bold text-lg disabled:opacity-30 disabled:cursor-not-allowed"
             >
               Join Room
             </motion.button>

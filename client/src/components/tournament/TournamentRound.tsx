@@ -7,16 +7,12 @@ import type { PlayerRoundStateClient, PeerStatus, TournamentConfig } from '../..
 import type { AnyGuess } from '../../lib/stages'
 import { STAGE_MULTIPLIERS, degradedMultiplier, calculatePayout } from '../../lib/payouts'
 import type { Stage } from '../../lib/stages'
+import { DEV_MODE_ENABLED } from '../../config'
+import { Card } from '../Card'
 
-// ─── Timer configuration (same mechanic as casino-hard) ──────────────────────
+// ─── Timer configuration — bust only, no multiplier degradation ──────────────
 const TIMER_SECONDS = 30
 const STAGE_GRACE_MS = 2000
-
-function computeFactor(timeLeft: number): number {
-  if (timeLeft >= TIMER_SECONDS) return 1.0
-  if (timeLeft <= 0) return 0.5
-  return 1.0 - ((TIMER_SECONDS - timeLeft) / (TIMER_SECONDS - 1)) * 0.5
-}
 
 interface Props {
   myId: string
@@ -24,9 +20,11 @@ interface Props {
   config: TournamentConfig
   roundNumber: number
   peers: PeerStatus[]
+  devMode?: boolean
   onGuess: (guess: AnyGuess, factor: number) => void
   onCashOut: () => void
   onContinue: () => void
+  onForfeit: () => void
 }
 
 export function TournamentRound({
@@ -35,11 +33,13 @@ export function TournamentRound({
   config,
   roundNumber,
   peers,
+  devMode = false,
   onGuess,
   onCashOut,
   onContinue,
+  onForfeit,
 }: Props) {
-  const { gamePhase, currentStage, revealedCards, bet, roundPayout, lockedMultipliers } = roundState
+  const { gamePhase, currentStage, revealedCards, bet, roundPayout, lockedMultipliers, devDeck } = roundState
 
   const [showFlash, setShowFlash] = useState<'win' | 'loss' | null>(null)
   const [shake, setShake] = useState(false)
@@ -47,7 +47,7 @@ export function TournamentRound({
   const [graceActive, setGraceActive] = useState(false)
   const [prevPhase, setPrevPhase] = useState(gamePhase)
 
-  const factor = computeFactor(timeLeft)
+  const factor = 1
   const pct = timeLeft / TIMER_SECONDS
   const isRed = pct <= 0.2
   const isYellow = !isRed && pct <= 0.5
@@ -91,6 +91,12 @@ export function TournamentRound({
     return () => clearInterval(interval)
   }, [gamePhase, graceActive])
 
+  // Bust on expiry
+  useEffect(() => {
+    if (timeLeft > 0) return
+    if (gamePhase === 'stage') onForfeit()
+  }, [timeLeft]) // eslint-disable-line react-hooks/exhaustive-deps
+
   // Cashout phase — show degrading timer too (visual only, factor locked on guess)
   useEffect(() => {
     if (gamePhase !== 'cashout') return
@@ -119,17 +125,23 @@ export function TournamentRound({
         )}
       </AnimatePresence>
 
-      {/* Header */}
-      <div className="w-full max-w-2xl flex items-center justify-between">
-        <div>
-          <h1 className="font-display font-bold text-gold text-xl">Tournament</h1>
-          <p className="text-white/40 text-xs">
-            Round {roundNumber} of {config.totalRounds}
-          </p>
+      {/* Dev panel — next card preview */}
+      {DEV_MODE_ENABLED && devMode && gamePhase === 'stage' && devDeck && devDeck[currentStage - 1] && (
+        <div className="absolute left-4 top-1/2 -translate-y-1/2 flex flex-col items-center gap-2 z-30">
+          <span className="text-yellow-400 text-xs font-mono uppercase tracking-widest">Next card</span>
+          <Card card={devDeck[currentStage - 1]} revealed size="md" />
         </div>
+      )}
+
+      {/* Header */}
+      <div className="w-full max-w-2xl flex items-start justify-between relative">
+        <div className="w-24">
+          <p className="text-white/40 text-xs">Round {roundNumber} of {config.totalRounds}</p>
+        </div>
+        <h1 className="font-display font-bold text-gold text-3xl absolute left-1/2 -translate-x-1/2">Tournament</h1>
         <div className="text-right">
           <p className="text-white/40 text-xs">Bet</p>
-          <p className="text-gold font-bold">${bet.toLocaleString()}</p>
+          <p className="text-gold font-bold text-xl">${bet.toLocaleString()}</p>
         </div>
       </div>
 
@@ -145,11 +157,7 @@ export function TournamentRound({
           >
             <div className="flex justify-between text-xs mb-1 px-0.5">
               <span className={`uppercase tracking-widest ${graceActive ? 'text-blue-400 animate-pulse' : 'text-white/40'}`}>
-                {graceActive
-                  ? 'Get ready…'
-                  : factor < 1
-                  ? `Multiplier ${(factor * 100).toFixed(0)}%`
-                  : 'Time'}
+                {graceActive ? 'Get ready…' : 'Time'}
               </span>
               <span className={`font-bold tabular-nums ${isRed ? 'text-red-400' : isYellow ? 'text-yellow-400' : 'text-white/60'}`}>
                 {timeLeft}s
@@ -175,11 +183,8 @@ export function TournamentRound({
           const done = revealedCards.length >= s
           const active = currentStage === s && (gamePhase === 'stage' || gamePhase === 'cashout')
           const locked = lockedMultipliers[s as Stage]
-          const rawMult =
-            locked !== undefined
-              ? locked
-              : degradedMultiplier(STAGE_MULTIPLIERS[s as Stage], factor)
-          const displayMult = Number.isInteger(rawMult) ? rawMult : rawMult.toFixed(1)
+          const rawMult = locked !== undefined ? locked : STAGE_MULTIPLIERS[s as Stage]
+          const displayMult = Number.isInteger(rawMult) ? rawMult : (Math.floor(rawMult * 10) / 10).toFixed(1)
           return (
             <div
               key={s}
@@ -271,7 +276,7 @@ export function TournamentRound({
               animate={{ opacity: 1, scale: 1 }}
               className="text-center py-4"
             >
-              <p className="text-red-400 text-lg font-bold">Bust! 💥</p>
+              <p className="text-red-400 text-lg font-bold">Game Over</p>
               <p className="text-white/40 text-sm">You lost ${bet.toLocaleString()} this round</p>
               <p className="text-white/30 text-sm mt-1">Waiting for other players…</p>
             </motion.div>

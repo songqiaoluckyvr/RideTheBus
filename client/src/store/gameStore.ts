@@ -1,5 +1,7 @@
 import { create } from 'zustand'
 import type { GameState } from '../lib/engine'
+import { STAGE_MULTIPLIERS, HARD_STAGE_MULTIPLIERS } from '../lib/payouts'
+import type { Stage } from '../lib/stages'
 import {
   createInitialState,
   placeBet,
@@ -31,7 +33,7 @@ interface Store extends GameState, PlayerMeta {
 
   // Game actions
   placeBet: (amount: number) => void
-  makeGuess: (guess: AnyGuess, factor?: number) => void
+  makeGuess: (guess: AnyGuess, factor?: number, multipliers?: Record<Stage, number>) => void
   continuePlaying: () => void
   cashOut: () => void
   newRound: () => void
@@ -61,7 +63,7 @@ export const useGameStore = create<Store>((set) => ({
   setDevMode: (devMode) => set({ devMode }),
 
   placeBet: (amount) => set((s) => placeBet(s, amount)),
-  makeGuess: (guess, factor = 1) => set((s) => makeGuess(s, guess, factor)),
+  makeGuess: (guess, factor = 1, multipliers = STAGE_MULTIPLIERS) => set((s) => makeGuess(s, guess, factor, multipliers)),
   continuePlaying: () => set((s) => continuePlaying(s)),
   cashOut: () => set((s) => cashOut(s)),
   newRound: () => set((s) => newRound(s)),

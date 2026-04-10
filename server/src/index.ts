@@ -1,3 +1,6 @@
+/** Set to false before shipping to production. */
+const DEV_MODE_ENABLED = true
+
 import express from 'express'
 import { createServer } from 'http'
 import { Server } from 'socket.io'
@@ -123,7 +126,7 @@ io.on('connection', (socket) => {
     const round = room.tournament!.currentRound!
     const ps = round.playerStates[socket.id]
 
-    socket.emit('player_round_update', { ...ps, deck: undefined })
+    socket.emit('player_round_update', { ...ps, deck: undefined, devDeck: DEV_MODE_ENABLED ? ps.deck : undefined })
     io.to(code).emit('player_bet_placed', {
       playerId: socket.id,
       amount,
@@ -170,7 +173,7 @@ io.on('connection', (socket) => {
     }
 
     const ps = round.playerStates[socket.id]
-    socket.emit('player_round_update', { ...ps, deck: undefined })
+    socket.emit('player_round_update', { ...ps, deck: undefined, devDeck: DEV_MODE_ENABLED ? ps.deck : undefined })
 
     io.to(code).emit('stage_result', {
       playerId: socket.id,
@@ -206,7 +209,7 @@ io.on('connection', (socket) => {
 
     const round = room.tournament!.currentRound!
     const ps = round.playerStates[socket.id]
-    socket.emit('player_round_update', { ...ps, deck: undefined })
+    socket.emit('player_round_update', { ...ps, deck: undefined, devDeck: DEV_MODE_ENABLED ? ps.deck : undefined })
 
     io.to(code).emit('player_round_done', {
       playerId: socket.id,
@@ -231,7 +234,32 @@ io.on('connection', (socket) => {
     }
 
     const ps = room.tournament!.currentRound!.playerStates[socket.id]
-    socket.emit('player_round_update', { ...ps, deck: undefined })
+    socket.emit('player_round_update', { ...ps, deck: undefined, devDeck: DEV_MODE_ENABLED ? ps.deck : undefined })
+  })
+
+  socket.on('player_forfeit', ({ code }: { code: string }) => {
+    const room = getRoom(code)
+    if (!room) return
+
+    const round = room.tournament?.currentRound
+    if (!round) return
+
+    forfeitPlayer(room, socket.id)
+
+    const ps = round.playerStates[socket.id]
+    if (ps) {
+      socket.emit('player_round_update', { ...ps, deck: undefined, devDeck: DEV_MODE_ENABLED ? ps.deck : undefined })
+      io.to(code).emit('player_round_done', {
+        playerId: socket.id,
+        outcome: 'bust',
+        payout: 0,
+        newBalance: room.players.find((p) => p.id === socket.id)?.balance,
+      })
+    }
+
+    if (areAllDone(round)) {
+      _emitRoundEnd(room, code)
+    }
   })
 
   // ready_for_next_round removed — server auto-advances after leaderboard delay
@@ -286,13 +314,16 @@ function _emitRoundEnd(room: ReturnType<typeof getRoom> & object, code: string) 
     const current = getRoom(code)
     if (!current || !current.tournament) return
 
-    if (isFinal) {
+    const allBroke = current.players.every((p) => p.balance <= 0)
+
+    if (isFinal || allBroke) {
       finalizeTournament(current)
+      const winnerId = current.tournament.winnerId
       io.to(code).emit('tournament_finished', {
         leaderboard: current.tournament.finalLeaderboard,
-        winnerId: current.tournament.winnerId,
-        winnerName: current.players.find((p) => p.id === current.tournament!.winnerId)?.name,
-        prize: current.tournament.config.prizePool,
+        winnerId,
+        winnerName: winnerId ? current.players.find((p) => p.id === winnerId)?.name ?? null : null,
+        prize: winnerId ? current.tournament.config.prizePool : 0,
       })
     } else {
       const prevBals = Object.fromEntries(current.players.map((p) => [p.id, p.balance]))

@@ -192,7 +192,11 @@ export function useSocket() {
     getSocket().emit('continue_playing', { code })
   }, [])
 
-return {
+  const forfeit = useCallback((code: string) => {
+    getSocket().emit('player_forfeit', { code })
+  }, [])
+
+    return {
     connected: socket?.connected ?? false,
     myId,
     createRoom,
@@ -203,5 +207,6 @@ return {
     makeGuess,
     cashOut,
     continuePlaying,
+    forfeit,
   }
 }

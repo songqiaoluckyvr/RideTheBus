@@ -73,7 +73,12 @@ export function placeBet(state: GameState, amount: number): GameState {
 }
 
 /** multiplierFactor: degradation factor at the moment of guess (1 = full, 0.5 = half profit) */
-export function makeGuess(state: GameState, guess: AnyGuess, multiplierFactor = 1): GameState {
+export function makeGuess(
+  state: GameState,
+  guess: AnyGuess,
+  multiplierFactor = 1,
+  multipliers: Record<Stage, number> = STAGE_MULTIPLIERS,
+): GameState {
   if (state.phase !== 'stage') return state
 
   const { currentStage, deck, revealedCards, bet } = state
@@ -105,12 +110,12 @@ export function makeGuess(state: GameState, guess: AnyGuess, multiplierFactor = 
   const nextStage = (currentStage + 1) as Stage
   const isFinalStage = currentStage === 5
 
-  const effectiveMult = degradedMultiplier(STAGE_MULTIPLIERS[currentStage as Stage], multiplierFactor)
+  const effectiveMult = degradedMultiplier(multipliers[currentStage as Stage], multiplierFactor)
   const updatedLockedMultipliers = { ...state.lockedMultipliers, [currentStage]: effectiveMult }
 
   if (isFinalStage) {
-    const payout = calculatePayout(bet, 5, multiplierFactor)
-    const fullPayout = calculatePayout(bet, 5, 1)
+    const payout = calculatePayout(bet, 5, multiplierFactor, multipliers)
+    const fullPayout = calculatePayout(bet, 5, 1, multipliers)
     const pct = Math.round((payout / fullPayout) * 100)
     const record: RoundRecord = {
       bet,
@@ -137,7 +142,7 @@ export function makeGuess(state: GameState, guess: AnyGuess, multiplierFactor = 
     currentStage: nextStage,
     revealedCards: newRevealed,
     lastResult: 'win',
-    roundPayout: calculatePayout(bet, currentStage, multiplierFactor),
+    roundPayout: calculatePayout(bet, currentStage, multiplierFactor, multipliers),
     lockedMultipliers: updatedLockedMultipliers,
   }
 }
@@ -165,10 +170,15 @@ export function cashOut(state: GameState): GameState {
   return {
     ...state,
     phase: 'idle',
+    currentStage: 1,
+    bet: 0,
+    deck: [],
+    revealedCards: [],
+    lastResult: null,
+    lockedMultipliers: {},
     balance: state.balance - state.bet + payout,
     roundPayout: payout,
     history: [record, ...state.history].slice(0, 20),
-    revealedCards: state.revealedCards,
   }
 }
 
