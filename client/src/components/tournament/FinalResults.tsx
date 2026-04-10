@@ -14,6 +14,7 @@ interface Props {
 export function FinalResults({ myId, winnerId, winnerName, prize, leaderboard, onPlayAgain }: Props) {
   const navigate = useNavigate()
   const iWon = myId === winnerId
+  const noWinner = winnerId === null
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center gap-6 px-4 py-8">
@@ -24,11 +25,16 @@ export function FinalResults({ myId, winnerId, winnerName, prize, leaderboard, o
         transition={{ type: 'spring', stiffness: 200, damping: 14 }}
         className="text-7xl"
       >
-        {iWon ? '🏆' : '🎲'}
+        {noWinner ? '💸' : iWon ? '🏆' : '🎲'}
       </motion.div>
 
       <div className="text-center">
-        {iWon ? (
+        {noWinner ? (
+          <>
+            <h1 className="font-display text-white/60 text-3xl font-bold mb-2">Everyone went broke</h1>
+            <p className="text-white/30 text-lg">No winner — the house wins</p>
+          </>
+        ) : iWon ? (
           <>
             <h1 className="font-display text-gold text-4xl font-bold mb-2">You Won!</h1>
             <p className="text-gold/70 text-xl">+${prize.toLocaleString()} prize</p>
@@ -63,7 +69,7 @@ export function FinalResults({ myId, winnerId, winnerName, prize, leaderboard, o
               }`}
             >
               <span className="text-lg w-8 text-center">
-                {i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `#${i + 1}`}
+                {entry.balance <= 0 ? '' : i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `#${i + 1}`}
               </span>
               <div className="flex-1">
                 <p className={`font-semibold ${isWinner ? 'text-gold' : isMe ? 'text-white' : 'text-white/60'}`}>

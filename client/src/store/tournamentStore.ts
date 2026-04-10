@@ -25,6 +25,7 @@ export interface PlayerRoundStateClient {
   gamePhase: GamePhase
   roundPayout: number
   lockedMultipliers: Partial<Record<Stage, number>>
+  devDeck?: Card[]
 }
 
 export interface LeaderboardEntry {

@@ -406,14 +406,21 @@ export function finalizeTournament(room: GameRoom): void {
 
   const sorted = [...room.players].sort((a, b) => b.balance - a.balance)
   const winner = sorted[0]
-  room.tournament.winnerId = winner.id
-  winner.balance += room.tournament.config.prizePool
+
+  if (winner.balance > 0) {
+    // Normal finish — award prize to the leading player
+    room.tournament.winnerId = winner.id
+    winner.balance += room.tournament.config.prizePool
+  } else {
+    // Everyone went broke — no winner, prize not awarded
+    room.tournament.winnerId = null
+  }
 
   room.tournament.finalLeaderboard = sorted.map((p, i) => ({
     playerId: p.id,
     name: p.name,
     balance: p.balance,
-    roundDelta: i === 0 ? room.tournament!.config.prizePool : 0,
+    roundDelta: i === 0 && room.tournament!.winnerId ? room.tournament!.config.prizePool : 0,
   }))
 
   room.state = 'finished'
