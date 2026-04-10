@@ -113,9 +113,9 @@ export function Lobby() {
             </motion.div>
           ))}
 
-          {room.players.length < (isBR ? 10 : 4) && (
+          {room.players.length < (isBR ? 100 : 4) && (
             <div className="flex items-center justify-center border border-dashed border-white/10 rounded-xl py-3 text-white/20 text-sm">
-              Waiting for players ({room.players.length}/{isBR ? 10 : 4})
+              Waiting for players ({room.players.length}/{isBR ? 100 : 4})
             </div>
           )}
         </div>
