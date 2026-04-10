@@ -14,13 +14,12 @@ import { audioManager } from '../../lib/audioManager'
 
 // ─── Timer configuration per mode ────────────────────────────────────────────
 const TIMER_SECONDS = 30
-const STAGE_GRACE_MS = 2000
 
 type TimerType = 'bust' | 'degrading'
 
-const ROUND_TIMER_CONFIG: Record<string, { type: TimerType; minFactor: number }> = {
-  'tournament':    { type: 'bust',      minFactor: 0.5 },
-  'battle-royale': { type: 'degrading', minFactor: 0.5 },
+const ROUND_TIMER_CONFIG: Record<string, { type: TimerType; minFactor: number; graceMs: number }> = {
+  'tournament':    { type: 'bust',      minFactor: 0.5, graceMs: 0 },
+  'battle-royale': { type: 'degrading', minFactor: 0.5, graceMs: 1000 },
 }
 
 function computeFactor(timeLeft: number, type: TimerType, minFactor: number): number {
@@ -117,13 +116,13 @@ export function TournamentRound({
     setTimeLeft(TIMER_SECONDS)
   }, [gamePhase, currentStage])
 
-  // Grace period at stage entry
+  // Grace period at stage entry (0 = disabled)
   useEffect(() => {
-    if (gamePhase !== 'stage') return
+    if (gamePhase !== 'stage' || timerConfig.graceMs <= 0) return
     setGraceActive(true)
-    const t = setTimeout(() => setGraceActive(false), STAGE_GRACE_MS)
+    const t = setTimeout(() => setGraceActive(false), timerConfig.graceMs)
     return () => { clearTimeout(t); setGraceActive(false) }
-  }, [gamePhase, currentStage])
+  }, [gamePhase, currentStage, timerConfig.graceMs])
 
   // Countdown
   useEffect(() => {

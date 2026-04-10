@@ -16,6 +16,8 @@ interface Props {
   isDegradingMode?: boolean
   /** Active multiplier table for the current game mode */
   stageMultipliers?: Record<Stage, number>
+  /** Hard mode: scale full multiplier (can go below x1) */
+  fullScale?: boolean
   onPlaceBet: (amount: number) => void
   onCashOut: () => void
   onContinue: () => void
@@ -41,6 +43,7 @@ export function BettingPanel({
   multiplierFactor = 1,
   isDegradingMode = false,
   stageMultipliers,
+  fullScale = false,
 }: Props) {
   const [betInput, setBetInput] = useState('')
 
@@ -54,8 +57,8 @@ export function BettingPanel({
   // roundPayout is already locked in with the degradation factor from the moment of guess
   const cashoutValue = phase === 'cashout' ? roundPayout : 0
   // Next stage max = current factor (timer is global, doesn't reset between stages)
-  const nextValue = phase === 'cashout' ? calculatePayout(currentBet, currentStage, multiplierFactor, stageMultipliers) : 0
-  const isDegraded = cashoutValue > 0 && cashoutValue < calculatePayout(currentBet, (currentStage - 1) as Stage, 1, stageMultipliers)
+  const nextValue = phase === 'cashout' ? calculatePayout(currentBet, currentStage, multiplierFactor, stageMultipliers, fullScale) : 0
+  const isDegraded = cashoutValue > 0 && cashoutValue < calculatePayout(currentBet, (currentStage - 1) as Stage, 1, stageMultipliers, fullScale)
 
   return (
     <div className="flex flex-col gap-4 w-full max-w-md">

@@ -23,7 +23,7 @@ import { audioManager } from '../lib/audioManager'
 const TIMER_CONFIG = {
   tournament:      { seconds: 30, type: 'bust'      as const, minFactor: 0.5 },
   'battle-royale': { seconds: 30, type: 'degrading' as const, minFactor: 0.5 },
-  'casino-hard':   { seconds: 45, type: 'degrading' as const, minFactor: 0.4 },
+  'casino-hard':   { seconds: 45, type: 'degrading' as const, minFactor: 0.26 },
 } as const
 
 type TimerType = 'bust' | 'degrading'
@@ -65,7 +65,8 @@ export function Game() {
   }
 
   // Timer state
-  const stageMultipliers = mode === 'casino-hard' ? HARD_STAGE_MULTIPLIERS : STAGE_MULTIPLIERS
+  const isHardMode = mode === 'casino-hard'
+  const stageMultipliers = isHardMode ? HARD_STAGE_MULTIPLIERS : STAGE_MULTIPLIERS
 
   const timerConfig = TIMER_CONFIG[mode as keyof typeof TIMER_CONFIG]
   const timerEnabled = !!timerConfig
@@ -319,7 +320,7 @@ export function Game() {
           const rawMult = locked !== undefined
             ? locked
             : timerType === 'degrading'
-              ? degradedMultiplier(stageMultipliers[s as Stage], factor)
+              ? degradedMultiplier(stageMultipliers[s as Stage], factor, isHardMode)
               : stageMultipliers[s as Stage]
           const displayMult = Number.isInteger(rawMult) ? rawMult : (Math.floor(rawMult * 10) / 10).toFixed(1)
           return (
@@ -363,7 +364,7 @@ export function Game() {
             >
               <StagePrompt
                 stage={stageForPrompt}
-                onGuess={(guess: AnyGuess) => { audioManager.play('menu-select'); makeGuess(guess, factor, stageMultipliers) }}
+                onGuess={(guess: AnyGuess) => { audioManager.play('menu-select'); makeGuess(guess, factor, stageMultipliers, isHardMode) }}
                 disabled={phase !== 'stage'}
               />
             </motion.div>
@@ -379,6 +380,7 @@ export function Game() {
           multiplierFactor={factor}
           isDegradingMode={timerType === 'degrading'}
           stageMultipliers={stageMultipliers}
+          fullScale={isHardMode}
           onPlaceBet={(amount) => { audioManager.play('chips-added'); placeBet(amount) }}
           onCashOut={cashOut}
           onContinue={() => { continuePlaying(); setShowAchievement(false) }}

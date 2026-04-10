@@ -2,28 +2,29 @@ import type { Stage } from './stages'
 
 /** Multiplier applied directly to the bet at each stage — default (casino normal) */
 export const STAGE_MULTIPLIERS: Record<Stage, number> = {
-  1: 1.8,
-  2: 3.5,
-  3: 9,
-  4: 38,
-  5: 200,
+  1: 1.9,
+  2: 2.6,
+  3: 4,
+  4: 15,
+  5: 723,
 }
 
 /** Multiplier table for hard mode (independent, can be tuned separately) */
 export const HARD_STAGE_MULTIPLIERS: Record<Stage, number> = {
-  1: 2.7,
-  2: 5.25,
-  3: 13.5,
-  4: 57,
-  5: 300,
+  1: 2.9,
+  2: 4.0,
+  3: 6.1,
+  4: 23,
+  5: 1100,
 }
 
 /**
- * Apply a degradation factor to a multiplier's profit portion.
- * factor 1.0 = full multiplier, 0.5 = profit halved (e.g. x1.8 → x1.4)
+ * Apply a degradation factor to a multiplier.
+ * Default (fullScale=false): preserves a x1 base — profit portion scales (BR/Tournament).
+ * fullScale=true: entire multiplier scales linearly (Hard mode, can go below x1).
  */
-export function degradedMultiplier(baseMultiplier: number, factor: number): number {
-  return 1 + (baseMultiplier - 1) * factor
+export function degradedMultiplier(baseMultiplier: number, factor: number, fullScale = false): number {
+  return fullScale ? baseMultiplier * factor : 1 + (baseMultiplier - 1) * factor
 }
 
 /**
@@ -40,8 +41,9 @@ export function calculatePayout(
   stage: Stage,
   factor = 1,
   multipliers: Record<Stage, number> = STAGE_MULTIPLIERS,
+  fullScale = false,
 ): number {
-  return Math.floor(bet * roundMultiplier(degradedMultiplier(multipliers[stage], factor)))
+  return Math.floor(bet * roundMultiplier(degradedMultiplier(multipliers[stage], factor, fullScale)))
 }
 
 /** What the player stands to win next if they continue */
@@ -50,8 +52,9 @@ export function nextPotential(
   currentStage: Stage,
   factor = 1,
   multipliers: Record<Stage, number> = STAGE_MULTIPLIERS,
+  fullScale = false,
 ): number {
   const next = (currentStage + 1) as Stage
-  if (next > 5) return calculatePayout(bet, currentStage, factor, multipliers)
-  return calculatePayout(bet, next, factor, multipliers)
+  if (next > 5) return calculatePayout(bet, currentStage, factor, multipliers, fullScale)
+  return calculatePayout(bet, next, factor, multipliers, fullScale)
 }

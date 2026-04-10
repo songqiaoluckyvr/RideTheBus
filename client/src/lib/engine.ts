@@ -78,6 +78,7 @@ export function makeGuess(
   guess: AnyGuess,
   multiplierFactor = 1,
   multipliers: Record<Stage, number> = STAGE_MULTIPLIERS,
+  fullScale = false,
 ): GameState {
   if (state.phase !== 'stage') return state
 
@@ -110,12 +111,12 @@ export function makeGuess(
   const nextStage = (currentStage + 1) as Stage
   const isFinalStage = currentStage === 5
 
-  const effectiveMult = roundMultiplier(degradedMultiplier(multipliers[currentStage as Stage], multiplierFactor))
+  const effectiveMult = roundMultiplier(degradedMultiplier(multipliers[currentStage as Stage], multiplierFactor, fullScale))
   const updatedLockedMultipliers = { ...state.lockedMultipliers, [currentStage]: effectiveMult }
 
   if (isFinalStage) {
-    const payout = calculatePayout(bet, 5, multiplierFactor, multipliers)
-    const fullPayout = calculatePayout(bet, 5, 1, multipliers)
+    const payout = calculatePayout(bet, 5, multiplierFactor, multipliers, fullScale)
+    const fullPayout = calculatePayout(bet, 5, 1, multipliers, fullScale)
     const pct = Math.round((payout / fullPayout) * 100)
     const record: RoundRecord = {
       bet,
@@ -142,7 +143,7 @@ export function makeGuess(
     currentStage: nextStage,
     revealedCards: newRevealed,
     lastResult: 'win',
-    roundPayout: calculatePayout(bet, currentStage, multiplierFactor, multipliers),
+    roundPayout: calculatePayout(bet, currentStage, multiplierFactor, multipliers, fullScale),
     lockedMultipliers: updatedLockedMultipliers,
   }
 }

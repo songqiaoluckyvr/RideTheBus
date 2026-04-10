@@ -2,11 +2,11 @@ import type { Stage } from './stages'
 
 /** Multiplier applied directly to the bet at each stage */
 export const STAGE_MULTIPLIERS: Record<Stage, number> = {
-  1: 1.8,
-  2: 3.5,
-  3: 9,
-  4: 38,
-  5: 200,
+  1: 1.9,
+  2: 2.6,
+  3: 4,
+  4: 15,
+  5: 723,
 }
 
 /**
