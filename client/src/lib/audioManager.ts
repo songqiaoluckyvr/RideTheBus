@@ -67,8 +67,11 @@ class AudioManager {
   /** track: 1 = game play (bg-music-1), 2 = menus/lobby (bg-music-2) */
   startBgMusic(track: 1 | 2 = 2): void {
     const index = track - 1
-    // Already playing the right track — do nothing
-    if (this.bgAudio && this.bgIndex === index) return
+    // Already playing the right track — just resume if paused (autoplay may have blocked it)
+    if (this.bgAudio && this.bgIndex === index) {
+      if (this.bgAudio.paused) this.bgAudio.play().catch(() => {})
+      return
+    }
     // Switch tracks
     this.stopBgMusic()
     this.bgIndex = index
