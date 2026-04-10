@@ -166,7 +166,7 @@ export function Game() {
       {/* Header */}
       <div className="w-full max-w-2xl flex items-start justify-between relative">
         <div className="w-24" /> {/* spacer to balance the right side */}
-        <h1 className="font-display font-bold text-gold text-xl absolute left-1/2 -translate-x-1/2">Ride the Bus</h1>
+        <h1 className="font-display font-bold text-gold text-3xl absolute left-1/2 -translate-x-1/2">Ride the Bus</h1>
         <div className="text-right">
           <p className="text-white/40 text-xs">Current balance:</p>
           <p className="text-gold font-bold text-xl">${balance.toLocaleString()}</p>
