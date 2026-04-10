@@ -113,8 +113,9 @@ export function createRoom(
 
 export function joinRoom(code: string, playerId: string, playerName: string): GameRoom | null {
   const room = rooms.get(code)
+  if (!room || room.state !== 'waiting') return null
   const maxPlayers = room.mode === 'battle-royale' ? 10 : 4
-  if (!room || room.state !== 'waiting' || room.players.length >= maxPlayers) return null
+  if (room.players.length >= maxPlayers) return null
   const buyIn = room.players[0].buyIn
   room.players.push({
     id: playerId,
