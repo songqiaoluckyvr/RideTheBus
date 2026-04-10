@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { uiImageUrl } from '../../lib/cardAssets'
+import { ScrollingBackground } from '../ScrollingBackground'
 
 interface Props {
   multiplier: number
@@ -62,9 +63,9 @@ export function MultiplierReveal({ multiplier, prizePool, onDone }: Props) {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center gap-8 px-4 relative overflow-hidden">
-      <img src={uiImageUrl('background')} alt="" aria-hidden className="fixed inset-0 w-full h-full object-cover -z-10" />
+      <ScrollingBackground />
       <div className="fixed top-0 bottom-0 left-1/2 -translate-x-1/2 w-full max-w-xl -z-[1] pointer-events-none">
-        <img src={uiImageUrl('table-felt')} alt="" aria-hidden className="w-full h-full object-cover opacity-95" />
+        <img src={uiImageUrl('table-felt')} alt="" aria-hidden className="w-full h-full object-fill opacity-95" />
       </div>
 
       {/* Background pulse rings */}

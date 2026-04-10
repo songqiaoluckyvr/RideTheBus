@@ -26,6 +26,15 @@ export default {
       perspective: {
         '1000': '1000px',
       },
+      keyframes: {
+        'scroll-down': {
+          '0%': { transform: 'translateY(-50%)' },
+          '100%': { transform: 'translateY(0%)' },
+        },
+      },
+      animation: {
+        'scroll-down': 'scroll-down 40s linear infinite',
+      },
     },
   },
   plugins: [],

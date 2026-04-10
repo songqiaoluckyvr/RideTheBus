@@ -5,6 +5,7 @@ import { useGameStore } from '../store/gameStore'
 import { useTournamentStore } from '../store/tournamentStore'
 import { useSocket } from '../hooks/useSocket'
 import { uiImageUrl } from '../lib/cardAssets'
+import { ScrollingBackground } from '../components/ScrollingBackground'
 import { audioManager } from '../lib/audioManager'
 
 const BUY_INS = [200, 400, 1000] as const
@@ -67,9 +68,9 @@ export function Lobby() {
   if (lobbyPhase === 'waiting' && room) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center gap-6 px-4 py-8 relative overflow-hidden">
-        <img src={uiImageUrl('background')} alt="" aria-hidden className="fixed inset-0 w-full h-full object-cover -z-10" />
+        <ScrollingBackground />
         <div className="fixed top-0 bottom-0 left-1/2 -translate-x-1/2 w-full max-w-xl -z-[1] pointer-events-none">
-          <img src={uiImageUrl('table-felt')} alt="" aria-hidden className="w-full h-full object-cover opacity-95" />
+          <img src={uiImageUrl('table-felt')} alt="" aria-hidden className="w-full h-full object-fill opacity-95" />
         </div>
         {/* Header */}
         <div className="text-center">
@@ -186,9 +187,9 @@ export function Lobby() {
   // Setup phase — create or join
   return (
     <div className="min-h-screen flex flex-col items-center justify-center gap-6 px-4 py-8 relative overflow-hidden">
-      <img src={uiImageUrl('background')} alt="" aria-hidden className="fixed inset-0 w-full h-full object-cover -z-10" />
+      <ScrollingBackground />
       <div className="fixed top-0 bottom-0 left-1/2 -translate-x-1/2 w-full max-w-xl -z-[1] pointer-events-none">
-        <img src={uiImageUrl('table-felt')} alt="" aria-hidden className="w-full h-full object-cover opacity-95" />
+        <img src={uiImageUrl('table-felt')} alt="" aria-hidden className="w-full h-full object-fill opacity-95" />
       </div>
       <div className="text-center">
         <h1 className="font-display text-gold text-3xl font-bold">{modeLabel}</h1>

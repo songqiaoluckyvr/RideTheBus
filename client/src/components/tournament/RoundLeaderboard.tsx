@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import type { LeaderboardEntry } from '../../store/tournamentStore'
 import { uiImageUrl } from '../../lib/cardAssets'
+import { ScrollingBackground } from '../ScrollingBackground'
 
 interface Props {
   roundNumber: number
@@ -25,9 +26,9 @@ export function RoundLeaderboard({ roundNumber, totalRounds, leaderboard, myId, 
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center gap-6 px-4 py-8 relative overflow-hidden">
-      <img src={uiImageUrl('background')} alt="" aria-hidden className="fixed inset-0 w-full h-full object-cover -z-10" />
+      <ScrollingBackground />
       <div className="fixed top-0 bottom-0 left-1/2 -translate-x-1/2 w-full max-w-xl -z-[1] pointer-events-none">
-        <img src={uiImageUrl('table-felt')} alt="" aria-hidden className="w-full h-full object-cover opacity-95" />
+        <img src={uiImageUrl('table-felt')} alt="" aria-hidden className="w-full h-full object-fill opacity-95" />
       </div>
       <div className="text-center">
         <h2 className="font-display text-gold text-3xl font-bold mb-1">
