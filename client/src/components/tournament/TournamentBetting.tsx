@@ -4,6 +4,7 @@ import { PlayerStatusList } from './PlayerStatusList'
 import type { LeaderboardEntry, PeerStatus, TournamentConfig } from '../../store/tournamentStore'
 import { uiImageUrl } from '../../lib/cardAssets'
 import { ScrollingBackground } from '../ScrollingBackground'
+import { audioManager } from '../../lib/audioManager'
 
 const BET_TIMER_SECONDS = 20
 
@@ -35,6 +36,11 @@ export function TournamentBetting({
   const [sliderValue, setSliderValue] = useState(Math.floor(maxBet * 0.25))
   const [timeLeft, setTimeLeft] = useState(BET_TIMER_SECONDS)
   const timedOut = useRef(false)
+
+  // Switch to game music on betting screen
+  useEffect(() => {
+    audioManager.startBgMusic(1)
+  }, [])
 
   // Countdown — only while bet not placed
   useEffect(() => {
@@ -182,7 +188,8 @@ export function TournamentBetting({
                     key={frac}
                     whileHover={{ scale: 1.04 }}
                     whileTap={{ scale: 0.96 }}
-                    onClick={() => setSliderValue(amount)}
+                    onMouseEnter={() => audioManager.play('mouse-over-2')}
+                    onClick={() => { audioManager.play('soft-click'); setSliderValue(amount) }}
                     className={`py-2 rounded-lg border text-xs font-semibold transition-colors ${
                       sliderValue === amount
                         ? 'border-gold/70 bg-gold/10 text-gold'
@@ -200,7 +207,8 @@ export function TournamentBetting({
               <motion.button
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.97 }}
-                onClick={() => handleBet(sliderValue)}
+                onMouseEnter={() => audioManager.play('mouse-over')}
+                onClick={() => { audioManager.play('menu-selection-1'); handleBet(sliderValue) }}
                 className={`py-3 rounded-xl bg-gold text-black font-bold text-base ${isBR ? 'w-full' : 'flex-1'}`}
               >
                 Bet ${sliderValue.toLocaleString()}
@@ -209,7 +217,8 @@ export function TournamentBetting({
                 <motion.button
                   whileHover={{ scale: 1.03 }}
                   whileTap={{ scale: 0.97 }}
-                  onClick={() => handleBet(0)}
+                  onMouseEnter={() => audioManager.play('mouse-over-2')}
+                  onClick={() => { audioManager.play('soft-click'); handleBet(0) }}
                   className="px-5 py-3 rounded-xl border border-white/15 text-white/40 text-sm hover:border-white/30 transition-colors"
                 >
                   Skip

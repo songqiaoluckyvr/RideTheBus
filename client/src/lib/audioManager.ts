@@ -3,6 +3,10 @@ type SfxName =
   | 'deck-shuffle'
   | 'chips-added'
   | 'menu-select'
+  | 'mouse-over'
+  | 'mouse-over-2'
+  | 'menu-selection-1'
+  | 'soft-click'
   | 'win'
   | 'lose'
   | 'joker-unlock'
@@ -13,6 +17,10 @@ const SFX_FILES: Record<Exclude<SfxName, 'lose'>, string> = {
   'deck-shuffle':    'audio/deck-shuffle.mp3',
   'chips-added':     'audio/chips-added.mp3',
   'menu-select':     'audio/menu-select.mp3',
+  'mouse-over':      'audio/mouse-over-1.mp3',
+  'mouse-over-2':    'audio/mouse-over-2.mp3',
+  'menu-selection-1':'audio/menu-selection-1.mp3',
+  'soft-click':      'audio/menu-selection-2.mp3',
   'win':             'audio/win.mp3',
   'joker-unlock':    'audio/joker-unlock.mp3',
   'joker-gold-unlock': 'audio/joker-gold-unlock.mp3',
@@ -22,7 +30,17 @@ const LOSE_FILES = ['audio/lose-1.mp3', 'audio/lose-2.mp3', 'audio/lose-3.mp3']
 const BG_MUSIC_FILES = ['audio/bg-music-1.mp3', 'audio/bg-music-2.mp3']
 
 const SFX_VOLUME = 0.7
-const MUSIC_VOLUME = 0.3
+const MUSIC_VOLUME = 0.27
+
+/** Per-sound volume multiplier (applied on top of SFX_VOLUME) */
+const SFX_VOLUME_SCALE: Partial<Record<SfxName, number>> = {
+  'mouse-over':   0.25,
+  'mouse-over-2': 1.6,
+  'menu-selection-1': 0.5,
+  'soft-click':   0.05,
+  'joker-unlock':      0.75,
+  'joker-gold-unlock': 0.75,
+}
 
 class AudioManager {
   private sfxCache: Map<string, HTMLAudioElement> = new Map()
@@ -60,6 +78,7 @@ class AudioManager {
       file = SFX_FILES[sound]
     }
     const audio = this.loadSfx(file)
+    audio.volume = Math.min(1, SFX_VOLUME * (SFX_VOLUME_SCALE[sound] ?? 1))
     audio.currentTime = 0
     audio.play().catch(() => {/* autoplay blocked — user hasn't interacted yet */})
   }

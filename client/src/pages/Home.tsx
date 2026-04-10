@@ -56,14 +56,17 @@ export function Home() {
     }
   }, [])
 
+  const MODE_ROUTES: Record<GameMode, string> = {
+    'casino': '/solo-normal',
+    'casino-hard': '/solo-hard',
+    'tournament': '/lobby',
+    'battle-royale': '/lobby',
+  }
+
   const handleStart = () => {
     reset()
     setMode_(mode)
-    if (mode === 'casino' || mode === 'casino-hard') {
-      navigate('/game')
-    } else {
-      navigate('/lobby')
-    }
+    navigate(MODE_ROUTES[mode])
   }
 
   return (
@@ -82,7 +85,8 @@ export function Home() {
         <div className="w-full flex items-center justify-between px-4">
           <div className="flex gap-2">
             <button
-              onClick={() => setShowTutorial(true)}
+              onClick={() => { audioManager.play('soft-click'); setShowTutorial(true) }}
+              onMouseEnter={() => audioManager.play('mouse-over-2')}
               className="w-10 h-10 flex items-center justify-center rounded-lg bg-white/5 border border-white/10 text-white/70 hover:bg-white/10 transition-colors"
               title="Tutorial"
             >
@@ -91,7 +95,8 @@ export function Home() {
               </svg>
             </button>
             <button
-              onClick={() => { if (window.confirm('Reset balance to $1,000?')) resetBalance() }}
+              onClick={() => { audioManager.play('soft-click'); if (window.confirm('Reset balance to $1,000?')) { resetBalance(); audioManager.play('joker-unlock') } }}
+              onMouseEnter={() => audioManager.play('mouse-over-2')}
               className="w-10 h-10 flex items-center justify-center rounded-lg bg-white/5 border border-white/10 text-white/70 hover:bg-white/10 transition-colors"
               title="Reset balance"
             >
@@ -100,7 +105,8 @@ export function Home() {
               </svg>
             </button>
             <button
-              onClick={toggleMute}
+              onClick={() => { audioManager.play('soft-click'); toggleMute() }}
+              onMouseEnter={() => audioManager.play('mouse-over-2')}
               className={`w-10 h-10 flex items-center justify-center rounded-lg border transition-colors ${muted ? 'bg-white/5 border-white/10 text-white/30' : 'bg-white/5 border-white/10 text-white/70 hover:bg-white/10'}`}
               title={muted ? 'Unmute' : 'Mute'}
             >
@@ -118,7 +124,8 @@ export function Home() {
 
           {DEV_MODE_ENABLED ? (
             <button
-              onClick={() => setDevMode(!devMode)}
+              onClick={() => { audioManager.play(!devMode ? 'joker-gold-unlock' : 'soft-click'); setDevMode(!devMode) }}
+              onMouseEnter={() => audioManager.play('mouse-over-2')}
               className={`px-3 py-1.5 text-xs rounded-lg border font-mono transition-colors ${
                 devMode
                   ? 'border-yellow-500/60 bg-yellow-500/10 text-yellow-400'
@@ -172,7 +179,8 @@ export function Home() {
                   key={m.id}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  onClick={() => setMode(m.id)}
+                  onMouseEnter={() => audioManager.play('mouse-over')}
+                  onClick={() => { audioManager.play('menu-selection-1'); setMode(m.id) }}
                   className={`flex-1 px-3 py-3 rounded-xl border text-left transition-colors ${
                     mode === m.id
                       ? 'border-gold bg-gold/10 text-white'
@@ -195,7 +203,8 @@ export function Home() {
                   key={m.id}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  onClick={() => setMode(m.id)}
+                  onMouseEnter={() => audioManager.play('mouse-over')}
+                  onClick={() => { audioManager.play('menu-selection-1'); setMode(m.id) }}
                   className={`flex items-start gap-3 px-4 py-3 rounded-xl border text-left transition-colors ${
                     mode === m.id
                       ? 'border-gold bg-gold/10 text-white'
@@ -217,7 +226,8 @@ export function Home() {
         <motion.button
           whileHover={{ scale: 1.03 }}
           whileTap={{ scale: 0.97 }}
-          onClick={handleStart}
+          onMouseEnter={() => audioManager.play('mouse-over')}
+          onClick={() => { audioManager.play('menu-selection-1'); handleStart() }}
           className="py-4 rounded-xl bg-gold text-black font-display font-bold text-lg mt-1"
         >
           Let's Ride →

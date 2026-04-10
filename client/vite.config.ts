@@ -12,4 +12,13 @@ export default defineConfig({
       },
     },
   },
+  preview: {
+    proxy: {
+      '/socket.io': {
+        target: 'http://localhost:3001',
+        ws: true,
+      },
+    },
+  },
+  appType: 'spa',
 })

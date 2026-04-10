@@ -2,6 +2,7 @@ import { motion } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import type { LeaderboardEntry } from '../../store/tournamentStore'
 import { uiImageUrl } from '../../lib/cardAssets'
+import { audioManager } from '../../lib/audioManager'
 import { ScrollingBackground } from '../ScrollingBackground'
 
 interface Props {
@@ -115,7 +116,8 @@ export function FinalResults({ myId, winnerId, winnerIds, winnerName, winnerName
         <motion.button
           whileHover={{ scale: 1.03 }}
           whileTap={{ scale: 0.97 }}
-          onClick={() => { onPlayAgain(); navigate('/lobby') }}
+          onMouseEnter={() => audioManager.play('mouse-over')}
+          onClick={() => { audioManager.play('menu-selection-1'); onPlayAgain(); navigate('/lobby') }}
           className="flex-1 py-3 rounded-xl bg-gold text-black font-bold"
         >
           Play Again
@@ -123,7 +125,8 @@ export function FinalResults({ myId, winnerId, winnerIds, winnerName, winnerName
         <motion.button
           whileHover={{ scale: 1.03 }}
           whileTap={{ scale: 0.97 }}
-          onClick={() => { onPlayAgain(); navigate('/') }}
+          onMouseEnter={() => audioManager.play('mouse-over')}
+          onClick={() => { audioManager.play('menu-selection-1'); onPlayAgain(); navigate('/') }}
           className="flex-1 py-3 rounded-xl border border-white/20 text-white font-semibold"
         >
           Home
