@@ -56,6 +56,13 @@ export function Game() {
   const [showFlash, setShowFlash] = useState<'win' | 'loss' | null>(null)
   const [showAchievement, setShowAchievement] = useState(false)
   const [shake, setShake] = useState(false)
+  const [muted, setMuted] = useState(audioManager.muted)
+
+  const toggleMute = () => {
+    const next = !muted
+    audioManager.setMuted(next)
+    setMuted(next)
+  }
 
   // Timer state
   const stageMultipliers = mode === 'casino-hard' ? HARD_STAGE_MULTIPLIERS : STAGE_MULTIPLIERS
@@ -149,7 +156,7 @@ export function Game() {
   const stageForPrompt = phase === 'stage' ? currentStage : null
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-between py-3 px-4 relative overflow-hidden">
+    <div className="min-h-screen flex flex-col items-center justify-between pt-10 pb-10 px-4 relative overflow-hidden">
 
       {/* Background art */}
       <img
@@ -163,17 +170,6 @@ export function Game() {
       <div className="fixed top-0 bottom-0 left-1/2 -translate-x-1/2 w-full max-w-4xl -z-[1] pointer-events-none">
         <img src={uiImageUrl('table-felt')} alt="" aria-hidden className="w-full h-full object-cover opacity-95" />
       </div>
-
-      {/* Home button */}
-      <button
-        onClick={() => navigate('/')}
-        className="absolute top-4 left-4 z-50 w-10 h-10 flex items-center justify-center rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 transition-colors"
-        title="Back to Title"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5 text-white/70">
-          <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h4a1 1 0 001-1v-3h2v3a1 1 0 001 1h4a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
-        </svg>
-      </button>
 
       {/* Dev panel — next card preview */}
       {DEV_MODE_ENABLED && devMode && phase === 'stage' && deck[currentStage - 1] && (
@@ -202,32 +198,34 @@ export function Game() {
       {/* Win screen image overlay */}
       <AnimatePresence>
         {phase === 'complete' && (
-          <motion.img
+          <motion.div
             key="win-screen"
-            src={uiImageUrl('win-screen')}
-            alt="You win!"
             initial={{ opacity: 0, scale: 1.05 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.4 }}
-            className="fixed inset-0 w-full h-full object-contain pointer-events-none z-30"
-          />
+            className="fixed inset-0 flex items-center justify-center pointer-events-none z-30"
+          >
+            <div className="absolute bg-black/70 rounded-xl w-full max-w-[800px] h-[300px] -translate-y-[3.5vh]" />
+            <img src={uiImageUrl('win-screen')} alt="You win!" className="relative w-[90vw] max-w-4xl" />
+          </motion.div>
         )}
       </AnimatePresence>
 
       {/* Game over screen image overlay */}
       <AnimatePresence>
         {phase === 'bust' && (
-          <motion.img
+          <motion.div
             key="gameover-screen"
-            src={uiImageUrl('gameover-screen')}
-            alt="Game over"
             initial={{ opacity: 0, scale: 1.05 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.4 }}
-            className="fixed inset-0 w-full h-full object-contain pointer-events-none z-30"
-          />
+            className="fixed inset-0 flex items-center justify-center pointer-events-none z-30"
+          >
+            <div className="absolute bg-black/70 rounded-xl w-full max-w-[800px] h-[300px] -translate-y-[3.5vh]" />
+            <img src={uiImageUrl('gameover-screen')} alt="Game over" className="relative w-[90vw] max-w-4xl" />
+          </motion.div>
         )}
       </AnimatePresence>
 
@@ -241,7 +239,32 @@ export function Game() {
 
       {/* Header */}
       <div className="w-full max-w-2xl flex items-start justify-between relative">
-        <div className="w-24" /> {/* spacer to balance the right side */}
+        <div className="flex gap-2">
+          <button
+            onClick={() => navigate('/')}
+            className="w-10 h-10 flex items-center justify-center rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 transition-colors z-50"
+            title="Back to Title"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5 text-white/70">
+              <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h4a1 1 0 001-1v-3h2v3a1 1 0 001 1h4a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
+            </svg>
+          </button>
+          <button
+            onClick={toggleMute}
+            className={`w-10 h-10 flex items-center justify-center rounded-lg border transition-colors z-50 ${muted ? 'bg-white/5 border-white/10 text-white/30' : 'bg-white/5 border-white/10 text-white/70 hover:bg-white/10'}`}
+            title={muted ? 'Unmute' : 'Mute'}
+          >
+            {muted ? (
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5">
+                <path d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.707.707L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.707-3.707a1 1 0 011.09-.217zM12.293 7.293a1 1 0 011.414 0L15 8.586l1.293-1.293a1 1 0 111.414 1.414L16.414 10l1.293 1.293a1 1 0 01-1.414 1.414L15 11.414l-1.293 1.293a1 1 0 01-1.414-1.414L13.586 10l-1.293-1.293a1 1 0 010-1.414z" />
+              </svg>
+            ) : (
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
+                <path d="M19.952 1.651a.75.75 0 01.298.599V16.303a3 3 0 01-2.176 2.884l-1.32.377a2.553 2.553 0 11-1.403-4.909l2.311-.66a1.5 1.5 0 001.088-1.442V6.994l-9 2.572v9.737a3 3 0 01-2.176 2.884l-1.32.377a2.553 2.553 0 11-1.402-4.909l2.31-.66A1.5 1.5 0 008.25 15.5V5.251a.75.75 0 01.544-.721l10.5-3a.75.75 0 01.658.121z" />
+              </svg>
+            )}
+          </button>
+        </div>
         <h1 className="font-display font-bold text-gold text-3xl absolute left-1/2 -translate-x-1/2">Ride the Bus</h1>
         <div className="text-right">
           <p className="text-white/40 text-xs">Current balance:</p>
@@ -329,7 +352,7 @@ export function Game() {
       </div>
 
       {/* Stage prompt + betting panel in a layout-animated container */}
-      <div className="w-full max-w-2xl flex flex-col items-center gap-4 pb-2">
+      <div className="w-full max-w-2xl flex flex-col items-center gap-4 pb-4">
         <AnimatePresence>
           {stageForPrompt !== null && (
             <motion.div

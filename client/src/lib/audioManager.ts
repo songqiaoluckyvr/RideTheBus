@@ -28,6 +28,15 @@ class AudioManager {
   private sfxCache: Map<string, HTMLAudioElement> = new Map()
   private bgAudio: HTMLAudioElement | null = null
   private bgIndex = 0
+  private _muted = false
+
+  get muted(): boolean { return this._muted }
+
+  setMuted(muted: boolean): void {
+    this._muted = muted
+    if (this.bgAudio) this.bgAudio.muted = muted
+    for (const audio of this.sfxCache.values()) audio.muted = muted
+  }
 
   private base(): string {
     return import.meta.env.BASE_URL
@@ -37,6 +46,7 @@ class AudioManager {
     if (!this.sfxCache.has(file)) {
       const audio = new Audio(this.base() + file)
       audio.volume = SFX_VOLUME
+      audio.muted = this._muted
       this.sfxCache.set(file, audio)
     }
     return this.sfxCache.get(file)!
@@ -70,6 +80,7 @@ class AudioManager {
   private _playBgTrack(): void {
     const audio = new Audio(this.base() + BG_MUSIC_FILES[this.bgIndex])
     audio.volume = MUSIC_VOLUME
+    audio.muted = this._muted
     audio.onended = () => {
       this.bgIndex = (this.bgIndex + 1) % BG_MUSIC_FILES.length
       this._playBgTrack()

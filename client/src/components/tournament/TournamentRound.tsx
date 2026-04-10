@@ -150,7 +150,7 @@ export function TournamentRound({
   const nextValue = gamePhase === 'cashout' ? calculatePayout(bet, currentStage) : 0
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-between py-6 px-4 relative overflow-hidden">
+    <div className="min-h-screen flex flex-col items-center justify-between pt-12 pb-6 px-4 relative overflow-hidden">
 
       {/* Background art */}
       <img src={uiImageUrl('background')} alt="" aria-hidden className="fixed inset-0 w-full h-full object-cover -z-10" />

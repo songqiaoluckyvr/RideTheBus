@@ -184,12 +184,10 @@ export function BettingPanel({
           >
             {phase === 'bust' ? (
               <div className="text-center">
-                <p className="text-red-400 text-lg font-bold">Game Over</p>
-                <p className="text-white/50 text-sm">You lost ${currentBet}</p>
+                <p className="text-white/50 text-sm">You lost ${currentBet.toLocaleString()}</p>
               </div>
             ) : (
               <div className="text-center">
-                <p className="text-gold text-xl font-display font-bold">You rode the bus! 🏆</p>
                 <p className="text-gold/80 text-lg">+${(roundPayout - currentBet).toLocaleString()} profit</p>
               </div>
             )}
