@@ -58,7 +58,7 @@ export function Game() {
   const timerEnabled = !!timerConfig
   const timerSeconds = timerConfig?.seconds ?? 30
   const timerType: TimerType = timerConfig?.type ?? 'bust'
-  const [timeLeft, setTimeLeft] = useState(timerSeconds)
+  const [timeLeft, setTimeLeft] = useState<number>(timerSeconds)
   const [graceActive, setGraceActive] = useState(false)
 
   // Degradation factor (recomputed on every render — timeLeft changes every second)

@@ -137,20 +137,41 @@ export function Home() {
           <div className="flex flex-col gap-1 mt-3">
             <p className="text-white/30 text-xs uppercase tracking-widest">Multiplayer</p>
             <div className="flex flex-col gap-2">
-              {MULTI_MODES.map((m) => (
-                <motion.button
-                  key={m.id}
-                  className="flex items-start gap-3 px-4 py-3 rounded-xl border border-white/5 text-white/25 cursor-not-allowed text-left"
-                  disabled
-                >
-                  <span className="text-lg leading-none mt-0.5">{m.label.split(' ')[0]}</span>
-                  <div>
-                    <p className="font-semibold text-sm">{m.label.slice(m.label.indexOf(' ') + 1)}</p>
-                    <p className="text-xs opacity-60 mt-0.5">{m.desc}</p>
-                    <p className="text-xs text-gold/40 mt-0.5">Coming soon</p>
-                  </div>
-                </motion.button>
-              ))}
+              {MULTI_MODES.map((m) => {
+                const enabled = m.id === 'tournament'
+                return enabled ? (
+                  <motion.button
+                    key={m.id}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => setMode(m.id)}
+                    className={`flex items-start gap-3 px-4 py-3 rounded-xl border text-left transition-colors ${
+                      mode === m.id
+                        ? 'border-gold bg-gold/10 text-white'
+                        : 'border-white/15 text-white/70 hover:border-white/30'
+                    }`}
+                  >
+                    <span className="text-lg leading-none mt-0.5">{m.label.split(' ')[0]}</span>
+                    <div>
+                      <p className="font-semibold text-sm">{m.label.slice(m.label.indexOf(' ') + 1)}</p>
+                      <p className="text-xs opacity-60 mt-0.5">{m.desc}</p>
+                    </div>
+                  </motion.button>
+                ) : (
+                  <motion.button
+                    key={m.id}
+                    className="flex items-start gap-3 px-4 py-3 rounded-xl border border-white/5 text-white/25 cursor-not-allowed text-left"
+                    disabled
+                  >
+                    <span className="text-lg leading-none mt-0.5">{m.label.split(' ')[0]}</span>
+                    <div>
+                      <p className="font-semibold text-sm">{m.label.slice(m.label.indexOf(' ') + 1)}</p>
+                      <p className="text-xs opacity-60 mt-0.5">{m.desc}</p>
+                      <p className="text-xs text-gold/40 mt-0.5">Coming soon</p>
+                    </div>
+                  </motion.button>
+                )
+              })}
             </div>
           </div>
         </div>
