@@ -12,6 +12,8 @@ interface Props {
   roundPayout: number
   /** Degradation factor from timer (1 = full multiplier, 0.5 = profit halved) */
   multiplierFactor?: number
+  /** True for modes where the multiplier degrades over time */
+  isDegradingMode?: boolean
   onPlaceBet: (amount: number) => void
   onCashOut: () => void
   onContinue: () => void
@@ -20,7 +22,7 @@ interface Props {
   onRestart: () => void
 }
 
-const QUICK_BETS = [10, 25, 50, 100, 250]
+const QUICK_BETS = [10, 50, 100, 250, 500]
 
 export function BettingPanel({
   balance,
@@ -35,6 +37,7 @@ export function BettingPanel({
   onBackToTitle,
   onRestart,
   multiplierFactor = 1,
+  isDegradingMode = false,
 }: Props) {
   const [betInput, setBetInput] = useState('')
 
@@ -47,33 +50,22 @@ export function BettingPanel({
 
   // roundPayout is already locked in with the degradation factor from the moment of guess
   const cashoutValue = phase === 'cashout' ? roundPayout : 0
-  // Next stage always starts with a fresh timer (factor=1)
-  const nextValue = phase === 'cashout' ? calculatePayout(currentBet, currentStage) : 0
+  // Next stage max = current factor (timer is global, doesn't reset between stages)
+  const nextValue = phase === 'cashout' ? calculatePayout(currentBet, currentStage, multiplierFactor) : 0
   const isDegraded = cashoutValue > 0 && cashoutValue < calculatePayout(currentBet, (currentStage - 1) as Stage)
 
   return (
     <div className="flex flex-col gap-4 w-full max-w-md">
-      {/* Balance */}
-      <div className="flex items-center justify-between bg-black/30 rounded-xl px-5 py-3 border border-gold/20">
-        <span className="text-white/60 text-sm">Balance</span>
-        <motion.span
-          key={balance}
-          initial={{ scale: 1.15, color: '#f0d060' }}
-          animate={{ scale: 1, color: '#ffffff' }}
-          className="text-xl font-bold font-display"
-        >
-          ${balance.toLocaleString()}
-        </motion.span>
-      </div>
 
       {/* Betting phase */}
-      <AnimatePresence mode="wait">
+      <AnimatePresence>
         {phase === 'idle' && (
           <motion.div
             key="bet"
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0 }}
             className="flex flex-col gap-3"
           >
             <p className="text-white/60 text-sm text-center">Place your bet to start</p>
@@ -85,7 +77,7 @@ export function BettingPanel({
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={() => handleBet(b)}
-                  className="px-4 py-2 rounded-lg bg-felt-light border border-gold/30 text-gold font-semibold text-sm hover:border-gold/70 transition-colors"
+                  className="w-16 py-2 rounded-lg bg-felt-light border border-gold/30 text-gold font-semibold text-sm hover:border-gold/70 transition-colors"
                 >
                   ${b}
                 </motion.button>
@@ -119,7 +111,7 @@ export function BettingPanel({
               onClick={() => handleBet(balance)}
               className="py-2 rounded-xl border border-red-500/40 text-red-400 text-sm font-semibold hover:bg-red-900/20 transition-colors"
             >
-              ALL IN — ${balance.toLocaleString()}
+              ALL IN{'\u00A0\u00A0'}—{'\u00A0\u00A0'}${balance.toLocaleString()}
             </motion.button>
           </motion.div>
         )}
@@ -129,6 +121,8 @@ export function BettingPanel({
             key="playing"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0 }}
             className="text-center text-white/50 text-sm py-2"
           >
             Bet: <span className="text-gold font-bold">${currentBet}</span> · Stage {currentStage}/5
@@ -138,8 +132,10 @@ export function BettingPanel({
         {phase === 'cashout' && (
           <motion.div
             key="cashout"
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0 }}
             className="flex flex-col gap-3"
           >
             <div className={`bg-black/30 rounded-xl border p-4 text-center transition-colors ${isDegraded ? 'border-yellow-500/40' : 'border-gold/30'}`}>
@@ -150,7 +146,7 @@ export function BettingPanel({
                 ${cashoutValue.toLocaleString()}
               </p>
               <p className="text-white/30 text-xs mt-1">
-                Next stage: <span className="text-white/60">${nextValue.toLocaleString()}</span>
+                {isDegradingMode ? 'Next stage (max):' : 'Next stage:'} <span className="text-white/60">${nextValue.toLocaleString()}</span>
               </p>
             </div>
             <div className="flex gap-3">
@@ -177,8 +173,10 @@ export function BettingPanel({
         {(phase === 'bust' || phase === 'complete') && (
           <motion.div
             key="end"
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0 }}
             className="flex flex-col items-center gap-3"
           >
             {phase === 'bust' ? (

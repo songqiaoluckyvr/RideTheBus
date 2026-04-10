@@ -61,7 +61,7 @@ export function Home() {
         <h1 className="font-display font-black text-gold text-6xl md:text-7xl tracking-tight">
           Ride the Bus
         </h1>
-        <p className="text-white/40 mt-2 text-sm tracking-widest uppercase">Can you go all five?</p>
+        <p className="text-white/40 mt-2 text-sm tracking-widest uppercase">Are you luckier than the casino?</p>
       </motion.div>
 
       {/* Card decoration */}
@@ -134,7 +134,7 @@ export function Home() {
           </div>
 
           {/* Multiplayer */}
-          <div className="flex flex-col gap-1">
+          <div className="flex flex-col gap-1 mt-3">
             <p className="text-white/30 text-xs uppercase tracking-widest">Multiplayer</p>
             <div className="flex flex-col gap-2">
               {MULTI_MODES.map((m) => (

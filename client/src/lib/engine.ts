@@ -31,6 +31,8 @@ export interface RoundRecord {
   stagesCleared: number
   payout: number
   cashedOut: boolean
+  /** Percentage of full multiplier achieved (only set when < 100, i.e. degraded) */
+  multiplierPct?: number
 }
 
 const DEFAULT_BALANCE = 1000
@@ -108,11 +110,14 @@ export function makeGuess(state: GameState, guess: AnyGuess, multiplierFactor = 
 
   if (isFinalStage) {
     const payout = calculatePayout(bet, 5, multiplierFactor)
+    const fullPayout = calculatePayout(bet, 5, 1)
+    const pct = Math.round((payout / fullPayout) * 100)
     const record: RoundRecord = {
       bet,
       stagesCleared: 5,
       payout,
       cashedOut: false,
+      ...(pct < 100 && { multiplierPct: pct }),
     }
     return {
       ...state,
@@ -147,11 +152,15 @@ export function cashOut(state: GameState): GameState {
   if (state.phase !== 'cashout') return state
 
   const payout = state.roundPayout
+  const stagesCleared = state.currentStage - 1
+  const fullPayout = calculatePayout(state.bet, stagesCleared as Stage, 1)
+  const pct = Math.round((payout / fullPayout) * 100)
   const record: RoundRecord = {
     bet: state.bet,
-    stagesCleared: state.currentStage - 1,
+    stagesCleared,
     payout,
     cashedOut: true,
+    ...(pct < 100 && { multiplierPct: pct }),
   }
   return {
     ...state,

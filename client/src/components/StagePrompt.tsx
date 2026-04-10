@@ -99,32 +99,36 @@ export function StagePrompt({ stage, onGuess, disabled }: Props) {
       )}
 
       {stage === 5 && (
-        <div className="flex flex-col items-center gap-4 w-full max-w-md">
+        <div className="flex flex-col items-center gap-3 w-full max-w-xl">
           {/* Value selector */}
-          <div className="flex flex-wrap justify-center gap-1.5">
-            {VALUES.map((v) => (
-              <motion.button
-                key={v}
-                whileTap={{ scale: 0.93 }}
-                onClick={() => setSelectedValue(v)}
-                className={`w-10 h-10 rounded-lg border font-bold text-sm transition-colors ${
-                  selectedValue === v
-                    ? 'bg-gold text-black border-gold'
-                    : 'bg-felt-light border-white/20 text-white hover:border-gold/50'
-                }`}
-              >
-                {v}
-              </motion.button>
+          <div className="flex flex-col items-center gap-2">
+            {[['A','2','3','4','5','6','7'], ['8','9','10','J','Q','K']].map((row, rowIdx) => (
+              <div key={rowIdx} className="flex gap-2">
+                {row.map((v) => (
+                  <motion.button
+                    key={v}
+                    whileTap={{ scale: 0.93 }}
+                    onClick={() => setSelectedValue(v as Value)}
+                    className={`w-11 h-9 rounded-lg border font-bold text-sm transition-colors ${
+                      selectedValue === v
+                        ? 'bg-gold text-black border-gold'
+                        : 'bg-felt-light border-white/20 text-white hover:border-gold/50'
+                    }`}
+                  >
+                    {v}
+                  </motion.button>
+                ))}
+              </div>
             ))}
           </div>
           {/* Suit selector */}
-          <div className="flex gap-3">
+          <div className="flex gap-2">
             {SUITS.map((suit) => (
               <motion.button
                 key={suit}
                 whileTap={{ scale: 0.93 }}
                 onClick={() => setSelectedSuit(suit)}
-                className={`px-4 py-2 rounded-xl border font-bold text-lg transition-colors ${
+                className={`w-11 h-9 rounded-xl border font-bold text-lg transition-colors ${
                   selectedSuit === suit
                     ? 'bg-gold text-black border-gold'
                     : `bg-felt-light border-white/20 ${SUIT_COLOR[suit]} hover:border-gold/50`

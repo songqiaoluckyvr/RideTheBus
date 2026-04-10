@@ -118,7 +118,7 @@ export function Game() {
   const stageForPrompt = phase === 'stage' ? currentStage : null
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-between py-6 px-4 relative overflow-hidden">
+    <div className="min-h-screen flex flex-col items-center justify-between py-3 px-4 relative overflow-hidden">
 
       {/* Home button */}
       <button
@@ -164,20 +164,18 @@ export function Game() {
       />
 
       {/* Header */}
-      <div className="w-full max-w-2xl flex items-center justify-between">
-        <div>
-          <h1 className="font-display font-bold text-gold text-xl">Ride the Bus</h1>
-          <p className="text-white/40 text-xs">Welcome, {name || 'Player'}</p>
-        </div>
+      <div className="w-full max-w-2xl flex items-start justify-between relative">
+        <div className="w-24" /> {/* spacer to balance the right side */}
+        <h1 className="font-display font-bold text-gold text-xl absolute left-1/2 -translate-x-1/2">Ride the Bus</h1>
         <div className="text-right">
-          <p className="text-white/40 text-xs">Balance</p>
-          <p className="text-gold font-bold">${balance.toLocaleString()}</p>
+          <p className="text-white/40 text-xs">Current balance:</p>
+          <p className="text-gold font-bold text-xl">${balance.toLocaleString()}</p>
         </div>
       </div>
 
-      {/* Timer bar — only during stage phase */}
+      {/* Timer bar — stage phase (active) or cashout phase (frozen in blue) */}
       <AnimatePresence>
-        {timerEnabled && phase === 'stage' && (
+        {timerEnabled && (phase === 'stage' || phase === 'cashout') && (
           <motion.div
             key="timer"
             initial={{ opacity: 0, y: -4 }}
@@ -186,20 +184,28 @@ export function Game() {
             className="w-full max-w-2xl"
           >
             <div className="flex justify-between text-xs mb-1 px-0.5">
-              <span className={`uppercase tracking-widest ${graceActive ? 'text-blue-400 animate-pulse' : 'text-white/40'}`}>
-                {graceActive
-                  ? 'Get ready…'
-                  : timerType === 'degrading' && factor < 1
-                    ? `Multiplier ${(factor * 100).toFixed(0)}%`
-                    : 'Time'}
+              <span className={`uppercase tracking-widest ${phase === 'cashout' ? 'text-blue-400' : graceActive ? 'text-blue-400 animate-pulse' : 'text-white/40'}`}>
+                {phase === 'cashout'
+                  ? 'Paused'
+                  : graceActive
+                    ? 'Get ready…'
+                    : timerType === 'degrading' && factor < 1
+                      ? `Multiplier ${(factor * 100).toFixed(0)}%`
+                      : 'Time'}
               </span>
-              <span className={`font-bold tabular-nums ${isRed ? 'text-red-400' : isYellow ? 'text-yellow-400' : 'text-white/60'}`}>
+              <span className={`font-bold tabular-nums ${phase === 'cashout' ? 'text-blue-400' : isRed ? 'text-red-400' : isYellow ? 'text-yellow-400' : 'text-white/60'}`}>
                 {timeLeft}s
               </span>
             </div>
             <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
               <div
-                className={`h-full rounded-full ${graceActive ? 'animate-pulse bg-blue-400' : `transition-all duration-1000 ease-linear ${isRed ? 'bg-red-500' : isYellow ? 'bg-yellow-400' : 'bg-green-500'}`}`}
+                className={`h-full rounded-full ${
+                  phase === 'cashout'
+                    ? 'bg-blue-400'
+                    : graceActive
+                      ? 'animate-pulse bg-blue-400'
+                      : `transition-all duration-1000 ease-linear ${isRed ? 'bg-red-500' : isYellow ? 'bg-yellow-400' : 'bg-green-500'}`
+                }`}
                 style={{ width: `${(timeLeft / timerSeconds) * 100}%` }}
               />
             </div>
@@ -220,7 +226,7 @@ export function Game() {
             : timerType === 'degrading'
               ? degradedMultiplier(STAGE_MULTIPLIERS[s as Stage], factor)
               : STAGE_MULTIPLIERS[s as Stage]
-          const displayMult = Number.isInteger(rawMult) ? rawMult : rawMult.toFixed(1)
+          const displayMult = Number.isInteger(rawMult) ? rawMult : (Math.floor(rawMult * 10) / 10).toFixed(1)
           return (
             <div
               key={s}
@@ -241,7 +247,7 @@ export function Game() {
       </div>
 
       {/* Cards */}
-      <div className="flex-1 flex items-center justify-center w-full py-6">
+      <div className="flex-1 flex items-center justify-center w-full py-2">
         <CardRow
           revealedCards={revealedCards}
           currentStage={currentStage}
@@ -250,15 +256,15 @@ export function Game() {
         />
       </div>
 
-      {/* Stage prompt */}
-      <div className="w-full max-w-2xl flex flex-col items-center gap-6 pb-4">
-        <AnimatePresence mode="wait">
+      {/* Stage prompt + betting panel in a layout-animated container */}
+      <div className="w-full max-w-2xl flex flex-col items-center gap-4 pb-2">
+        <AnimatePresence>
           {stageForPrompt !== null && (
             <motion.div
               key={`prompt-${stageForPrompt}`}
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1, transition: { duration: 0 } }}
+              exit={{ opacity: 0, transition: { duration: 0 } }}
             >
               <StagePrompt
                 stage={stageForPrompt}
@@ -275,6 +281,8 @@ export function Game() {
           phase={phase}
           currentStage={currentStage}
           roundPayout={roundPayout}
+          multiplierFactor={factor}
+          isDegradingMode={timerType === 'degrading'}
           onPlaceBet={placeBet}
           onCashOut={cashOut}
           onContinue={() => { continuePlaying(); setShowAchievement(false) }}

@@ -6,18 +6,18 @@ interface Props {
 }
 
 export function HistoryLog({ history }: Props) {
-  if (history.length === 0) return null
+  const slots = Array.from({ length: 3 }, (_, i) => history[i] ?? null)
 
   return (
     <div className="w-full max-w-xs">
-      <h3 className="text-white/40 text-xs font-semibold uppercase tracking-widest mb-2 text-center">Round History</h3>
-      <div className="flex flex-col gap-1.5 max-h-64 overflow-y-auto pr-1">
-        <AnimatePresence initial={false}>
-          {history.map((r, i) => (
+      <h3 className="text-white/40 text-xs font-semibold uppercase tracking-widest mb-2 text-center">Last 3 rounds</h3>
+      <div className="flex flex-col gap-1.5">
+        {slots.map((r, i) => (
+          r ? (
             <motion.div
-              key={i}
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
+              key={history.length - 1 - i}
+              initial={{ opacity: 0, y: -12 }}
+              animate={{ opacity: 1, y: 0 }}
               className={`flex items-center justify-between rounded-lg px-3 py-2 text-xs border ${
                 r.payout > 0
                   ? 'bg-green-900/20 border-green-700/30 text-green-300'
@@ -27,14 +27,26 @@ export function HistoryLog({ history }: Props) {
               <div className="flex items-center gap-2">
                 <span>{r.payout > 0 ? '✅' : '💥'}</span>
                 <span>Bet ${r.bet} · {r.stagesCleared} stage{r.stagesCleared !== 1 ? 's' : ''}</span>
-                {r.cashedOut && <span className="text-gold/70">(cashed out)</span>}
+                {r.cashedOut && (
+                  <span className="text-gold/70">
+                    ({['cashed out', r.multiplierPct !== undefined ? `${r.multiplierPct}%` : null].filter(Boolean).join(' - ')})
+                  </span>
+                )}
+                {!r.cashedOut && r.multiplierPct !== undefined && (
+                  <span className="text-white/40">({r.multiplierPct}%)</span>
+                )}
               </div>
               <span className="font-bold">
                 {r.payout > 0 ? `+$${(r.payout - r.bet).toLocaleString()}` : `-$${r.bet}`}
               </span>
             </motion.div>
-          ))}
-        </AnimatePresence>
+          ) : (
+            <div
+              key={`empty-${i}`}
+              className="rounded-lg px-3 py-2 text-xs border border-white/5 bg-white/[0.02] h-[34px]"
+            />
+          )
+        ))}
       </div>
     </div>
   )

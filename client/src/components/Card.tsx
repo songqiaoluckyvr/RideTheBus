@@ -17,21 +17,21 @@ const SUIT_SYMBOL: Record<string, string> = {
 }
 
 const SIZE = {
-  sm: 'w-14 h-20',
-  md: 'w-20 h-28',
-  lg: 'w-28 h-40',
+  sm: 'w-16 h-24',
+  md: 'w-24 h-32',
+  lg: 'w-32 h-44',
 }
 
 const CENTER_VALUE_SIZE = {
-  sm: 'text-2xl',
-  md: 'text-3xl',
-  lg: 'text-5xl',
+  sm: 'text-3xl',
+  md: 'text-4xl',
+  lg: 'text-6xl',
 }
 
 const CORNER_SUIT_SIZE = {
-  sm: 'text-xl',   // center is text-2xl
-  md: 'text-2xl',  // center is text-3xl
-  lg: 'text-4xl',  // center is text-5xl
+  sm: 'text-2xl',   // center is text-3xl
+  md: 'text-3xl',   // center is text-4xl
+  lg: 'text-5xl',   // center is text-6xl
 }
 
 export function Card({ card, revealed = false, size = 'md', shake = false }: Props) {
