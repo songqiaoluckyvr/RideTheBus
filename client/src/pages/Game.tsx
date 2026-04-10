@@ -13,6 +13,7 @@ import type { Stage } from '../lib/stages'
 import { DEV_MODE_ENABLED } from '../config'
 import { Card } from '../components/Card'
 import { uiImageUrl } from '../lib/cardAssets'
+import { ScrollingBackground } from '../components/ScrollingBackground'
 import { audioManager } from '../lib/audioManager'
 
 // ─── Timer configuration per mode ────────────────────────────────────────────
@@ -159,16 +160,11 @@ export function Game() {
     <div className="min-h-screen flex flex-col items-center justify-between pt-10 pb-10 px-4 relative overflow-hidden">
 
       {/* Background art */}
-      <img
-        src={uiImageUrl('background')}
-        alt=""
-        aria-hidden
-        className="fixed inset-0 w-full h-full object-cover -z-10"
-      />
+      <ScrollingBackground />
 
       {/* Table felt — scoped to the play area column */}
       <div className="fixed top-0 bottom-0 left-1/2 -translate-x-1/2 w-full max-w-4xl -z-[1] pointer-events-none">
-        <img src={uiImageUrl('table-felt')} alt="" aria-hidden className="w-full h-full object-cover opacity-95" />
+        <img src={uiImageUrl('table-felt')} alt="" aria-hidden className="w-full h-full object-fill opacity-95" />
       </div>
 
       {/* Dev panel — next card preview */}
