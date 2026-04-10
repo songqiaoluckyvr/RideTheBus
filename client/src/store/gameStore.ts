@@ -10,6 +10,8 @@ import {
   cashOut,
   newRound,
   forfeit,
+  persistBalance,
+  DEFAULT_BALANCE,
 } from '../lib/engine'
 import type { AnyGuess } from '../lib/stages'
 
@@ -43,6 +45,8 @@ interface Store extends GameState, PlayerMeta {
   reset: () => void
   // Reset game state only, keep player name/mode
   restartSession: () => void
+  // Reset balance to $1,000
+  resetBalance: () => void
 }
 
 export const useGameStore = create<Store>((set) => ({
@@ -70,6 +74,18 @@ export const useGameStore = create<Store>((set) => ({
   forfeit: () => set((s) => forfeit(s)),
 
   reset: () => set((s) => ({ ...createInitialState(), name: '', mode: 'casino', roomCode: null, isHost: false, devMode: s.devMode })),
-  restartSession: () => set((s) => ({ ...createInitialState(), name: s.name, mode: s.mode, roomCode: s.roomCode, isHost: s.isHost, devMode: s.devMode })),
+  restartSession: () => set((s) => {
+    persistBalance(DEFAULT_BALANCE)
+    return { ...createInitialState(DEFAULT_BALANCE), name: s.name, mode: s.mode, roomCode: s.roomCode, isHost: s.isHost, devMode: s.devMode }
+  }),
+  resetBalance: () => set((s) => {
+    persistBalance(DEFAULT_BALANCE)
+    return { ...createInitialState(DEFAULT_BALANCE), name: s.name, mode: s.mode, roomCode: s.roomCode, isHost: s.isHost, devMode: s.devMode }
+  }),
 })
 )
+
+// Auto-persist balance on every change
+useGameStore.subscribe((state, prev) => {
+  if (state.balance !== prev.balance) persistBalance(state.balance)
+})

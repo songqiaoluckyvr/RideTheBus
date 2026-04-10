@@ -35,14 +35,27 @@ export interface RoundRecord {
   multiplierPct?: number
 }
 
-const DEFAULT_BALANCE = 1000
+export const DEFAULT_BALANCE = 1000
+const BALANCE_KEY = 'rtb_balance'
 
-export function createInitialState(): GameState {
+export function loadPersistedBalance(): number {
+  try {
+    const v = localStorage.getItem(BALANCE_KEY)
+    if (v !== null) { const n = Number(v); if (Number.isFinite(n) && n >= 0) return n }
+  } catch { /* SSR or private mode */ }
+  return DEFAULT_BALANCE
+}
+
+export function persistBalance(balance: number): void {
+  try { localStorage.setItem(BALANCE_KEY, String(balance)) } catch { /* ignore */ }
+}
+
+export function createInitialState(balance?: number): GameState {
   return {
     phase: 'idle',
     currentStage: 1,
     bet: 0,
-    balance: DEFAULT_BALANCE,
+    balance: balance ?? loadPersistedBalance(),
     deck: [],
     revealedCards: [],
     lastResult: null,

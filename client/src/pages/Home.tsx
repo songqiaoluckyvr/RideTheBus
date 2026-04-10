@@ -22,6 +22,8 @@ export function Home() {
   const [mode, setMode] = useState<GameMode>('casino')
   const setMode_ = useGameStore((s) => s.setMode)
   const reset = useGameStore((s) => s.reset)
+  const balance = useGameStore((s) => s.balance)
+  const resetBalance = useGameStore((s) => s.resetBalance)
   const devMode = useGameStore((s) => s.devMode)
   const setDevMode = useGameStore((s) => s.setDevMode)
   const navigate = useNavigate()
@@ -76,11 +78,21 @@ export function Home() {
 
         {/* Top bar with buttons */}
         <div className="w-full flex items-center justify-between px-4">
-          <button
-            onClick={toggleMute}
-            className={`w-10 h-10 flex items-center justify-center rounded-lg border transition-colors ${muted ? 'bg-white/5 border-white/10 text-white/30' : 'bg-white/5 border-white/10 text-white/70 hover:bg-white/10'}`}
-            title={muted ? 'Unmute' : 'Mute'}
-          >
+          <div className="flex gap-2">
+            <button
+              onClick={() => { if (window.confirm('Reset balance to $1,000?')) resetBalance() }}
+              className="w-10 h-10 flex items-center justify-center rounded-lg bg-white/5 border border-white/10 text-white/70 hover:bg-white/10 transition-colors"
+              title="Reset balance"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
+                <path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z" />
+              </svg>
+            </button>
+            <button
+              onClick={toggleMute}
+              className={`w-10 h-10 flex items-center justify-center rounded-lg border transition-colors ${muted ? 'bg-white/5 border-white/10 text-white/30' : 'bg-white/5 border-white/10 text-white/70 hover:bg-white/10'}`}
+              title={muted ? 'Unmute' : 'Mute'}
+            >
             {muted ? (
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5">
                 <path d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.707.707L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.707-3.707a1 1 0 011.09-.217zM12.293 7.293a1 1 0 011.414 0L15 8.586l1.293-1.293a1 1 0 111.414 1.414L16.414 10l1.293 1.293a1 1 0 01-1.414 1.414L15 11.414l-1.293 1.293a1 1 0 01-1.414-1.414L13.586 10l-1.293-1.293a1 1 0 010-1.414z" />
@@ -91,6 +103,7 @@ export function Home() {
               </svg>
             )}
           </button>
+          </div>
 
           {DEV_MODE_ENABLED ? (
             <button
@@ -106,35 +119,24 @@ export function Home() {
           ) : <div />}
         </div>
 
-      {/* Title */}
+      {/* Title + subtitle + card suits + balance — grouped for tight spacing */}
       <motion.div
         initial={{ opacity: 0, y: -30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, ease: 'easeOut' }}
-        className="text-center"
+        className="flex flex-col items-center gap-1"
       >
         <img src={uiImageUrl('title')} alt="Ride the Bus" className="w-72 md:w-96 mx-auto" />
-        <p className="text-white/40 mt-2 text-sm tracking-widest uppercase">Are you luckier than the casino?</p>
-      </motion.div>
-
-      {/* Card decoration */}
-      <motion.div
-        initial={{ opacity: 0, scale: 0.8 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ delay: 0.2, duration: 0.5 }}
-        className="flex gap-2"
-      >
-        {['♥', '♦', '♣', '♠'].map((s, i) => (
-          <motion.div
-            key={s}
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.3 + i * 0.08 }}
-            className={`text-2xl ${s === '♥' || s === '♦' ? 'text-red-400' : 'text-white/70'}`}
-          >
-            {s}
-          </motion.div>
-        ))}
+        <p className="text-white/40 text-sm tracking-widest uppercase">Are you luckier than the casino?</p>
+        <div className="flex gap-2">
+          {['♥', '♦', '♣', '♠'].map((s) => (
+            <span key={s} className={`text-2xl ${s === '♥' || s === '♦' ? 'text-red-400' : 'text-white/70'}`}>{s}</span>
+          ))}
+        </div>
+        <div className="text-center">
+          <p className="text-white/40 text-xs uppercase tracking-widest">Your Balance</p>
+          <p className="text-gold font-display font-bold text-2xl">${balance.toLocaleString()}</p>
+        </div>
       </motion.div>
 
       {/* Form */}
@@ -209,7 +211,6 @@ export function Home() {
         </motion.button>
       </motion.div>
 
-      <p className="text-white/20 text-xs">Starting balance: $1,000 · No registration required</p>
       </div>
     </div>
   )
