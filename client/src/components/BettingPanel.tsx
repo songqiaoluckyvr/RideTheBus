@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { calculatePayout } from '../lib/payouts'
+import { audioManager } from '../lib/audioManager'
 import type { Stage } from '../lib/stages'
 import type { GamePhase } from '../lib/engine'
 
@@ -109,7 +110,8 @@ export function BettingPanel({
                     key={frac}
                     whileHover={{ scale: 1.04 }}
                     whileTap={{ scale: 0.96 }}
-                    onClick={() => setSliderValue(amount)}
+                    onMouseEnter={() => audioManager.play('mouse-over-2')}
+                    onClick={() => { audioManager.play('soft-click'); setSliderValue(amount) }}
                     className={`py-2 rounded-lg border text-xs font-semibold transition-colors ${
                       sliderValue === amount
                         ? 'border-gold/70 bg-gold/10 text-gold'
@@ -126,7 +128,8 @@ export function BettingPanel({
             <motion.button
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.97 }}
-              onClick={() => handleBet(sliderValue)}
+              onMouseEnter={() => audioManager.play('mouse-over')}
+              onClick={() => { audioManager.play('menu-selection-1'); handleBet(sliderValue) }}
               className="py-3 rounded-xl bg-gold text-black font-bold text-base"
             >
               Bet ${sliderValue.toLocaleString()}
@@ -171,7 +174,8 @@ export function BettingPanel({
               <motion.button
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.97 }}
-                onClick={onCashOut}
+                onMouseEnter={() => audioManager.play('mouse-over-2')}
+                onClick={() => { audioManager.play('soft-click'); onCashOut() }}
                 className="flex-1 py-3 rounded-xl bg-gold text-black font-bold text-sm animate-pulse"
               >
                 Cash Out 💰
@@ -179,7 +183,8 @@ export function BettingPanel({
               <motion.button
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.97 }}
-                onClick={onContinue}
+                onMouseEnter={() => audioManager.play('mouse-over-2')}
+                onClick={() => { audioManager.play('soft-click'); onContinue() }}
                 className="flex-1 py-3 rounded-xl border border-white/30 text-white font-semibold text-sm hover:border-white/60"
               >
                 Keep Going →
@@ -213,7 +218,8 @@ export function BettingPanel({
                 <motion.button
                   whileHover={{ scale: 1.04 }}
                   whileTap={{ scale: 0.96 }}
-                  onClick={onNewRound}
+                  onMouseEnter={() => audioManager.play('mouse-over-2')}
+                  onClick={() => { audioManager.play('soft-click'); onNewRound() }}
                   className="flex-1 py-3 rounded-xl bg-felt-light border border-gold/40 text-white font-bold hover:border-gold/80 transition-colors"
                 >
                   Play Again
@@ -222,7 +228,8 @@ export function BettingPanel({
                 <motion.button
                   whileHover={{ scale: 1.04 }}
                   whileTap={{ scale: 0.96 }}
-                  onClick={onRestart}
+                  onMouseEnter={() => audioManager.play('mouse-over-2')}
+                  onClick={() => { audioManager.play('soft-click'); onRestart() }}
                   className="flex-1 py-3 rounded-xl bg-gold text-black font-bold hover:opacity-90 transition-opacity"
                 >
                   Restart the Game
@@ -231,7 +238,8 @@ export function BettingPanel({
               <motion.button
                 whileHover={{ scale: 1.04 }}
                 whileTap={{ scale: 0.96 }}
-                onClick={onBackToTitle}
+                onMouseEnter={() => audioManager.play('mouse-over-2')}
+                onClick={() => { audioManager.play('soft-click'); onBackToTitle() }}
                 className="flex-1 py-3 rounded-xl border border-white/20 text-white/60 font-semibold hover:border-white/40 hover:text-white/80 transition-colors"
               >
                 ← Back to Title

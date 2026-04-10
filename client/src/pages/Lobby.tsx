@@ -127,7 +127,7 @@ export function Lobby() {
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.97 }}
               onMouseEnter={() => audioManager.play('mouse-over')}
-              onClick={() => { audioManager.play('soft-click'); socket.setReady(room.code) }}
+              onClick={() => { audioManager.play('menu-selection-1'); socket.setReady(room.code) }}
               className="py-3 rounded-xl bg-gold text-black font-bold text-lg"
             >
               I'm Ready ✓
@@ -139,7 +139,7 @@ export function Lobby() {
               whileHover={{ scale: allReady ? 1.03 : 1 }}
               whileTap={{ scale: allReady ? 0.97 : 1 }}
               onMouseEnter={() => allReady && audioManager.play('mouse-over')}
-              onClick={() => { if (allReady) { audioManager.play('soft-click'); socket.startGame(room.code) } }}
+              onClick={() => { if (allReady) { audioManager.play('menu-selection-1'); socket.startGame(room.code) } }}
               disabled={!allReady}
               className={`py-3 rounded-xl font-bold text-lg transition-all ${
                 allReady
@@ -163,7 +163,7 @@ export function Lobby() {
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onMouseEnter={() => audioManager.play('mouse-over')}
-            onClick={() => { audioManager.play('soft-click'); handleBack() }}
+            onClick={() => { audioManager.play('menu-selection-1'); handleBack() }}
             className="py-2 rounded-xl border border-white/15 text-white/40 text-sm"
           >
             Leave Room
@@ -260,7 +260,7 @@ export function Lobby() {
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.97 }}
               onMouseEnter={() => audioManager.play('mouse-over')}
-              onClick={() => { audioManager.play('soft-click'); handleCreate() }}
+              onClick={() => { audioManager.play('menu-selection-1'); handleCreate() }}
               disabled={!name.trim()}
               className="py-3 rounded-xl bg-gold text-black font-bold text-lg disabled:opacity-30 disabled:cursor-not-allowed"
             >
@@ -288,7 +288,7 @@ export function Lobby() {
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.97 }}
               onMouseEnter={() => audioManager.play('mouse-over')}
-              onClick={() => { audioManager.play('soft-click'); handleJoin() }}
+              onClick={() => { audioManager.play('menu-selection-1'); handleJoin() }}
               disabled={!name.trim() || joinCode.length < 5}
               className="py-3 rounded-xl bg-gold text-black font-bold text-lg disabled:opacity-30 disabled:cursor-not-allowed"
             >
@@ -302,7 +302,7 @@ export function Lobby() {
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
         onMouseEnter={() => audioManager.play('mouse-over')}
-        onClick={() => { audioManager.play('soft-click'); handleBack() }}
+        onClick={() => { audioManager.play('menu-selection-1'); handleBack() }}
         className="px-6 py-2 rounded-xl border border-white/15 text-white/40 text-sm"
       >
         ← Back

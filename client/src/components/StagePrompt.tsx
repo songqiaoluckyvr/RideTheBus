@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
+import { audioManager } from '../lib/audioManager'
 import type { Stage, AnyGuess, Stage5Guess } from '../lib/stages'
 import { STAGE_INFO } from '../lib/stages'
 import type { Suit, Value } from '../lib/deck'
@@ -37,7 +38,8 @@ function Btn({ label, onClick, disabled, color = 'default' }: {
     <motion.button
       whileHover={{ scale: 1.04 }}
       whileTap={{ scale: 0.97 }}
-      onClick={onClick}
+      onMouseEnter={() => audioManager.play('mouse-over-2')}
+      onClick={() => { audioManager.play('soft-click'); onClick() }}
       disabled={disabled}
       className={`px-5 py-3 rounded-xl border font-semibold transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${colors[color] ?? colors.default}`}
     >
@@ -108,7 +110,8 @@ export function StagePrompt({ stage, onGuess, disabled }: Props) {
                   <motion.button
                     key={v}
                     whileTap={{ scale: 0.93 }}
-                    onClick={() => setSelectedValue(v as Value)}
+                    onMouseEnter={() => audioManager.play('mouse-over-2')}
+                    onClick={() => { audioManager.play('soft-click'); setSelectedValue(v as Value) }}
                     className={`w-11 h-9 rounded-lg border font-bold text-sm transition-colors ${
                       selectedValue === v
                         ? 'bg-gold text-black border-gold'
@@ -127,7 +130,8 @@ export function StagePrompt({ stage, onGuess, disabled }: Props) {
               <motion.button
                 key={suit}
                 whileTap={{ scale: 0.93 }}
-                onClick={() => setSelectedSuit(suit)}
+                onMouseEnter={() => audioManager.play('mouse-over-2')}
+                onClick={() => { audioManager.play('soft-click'); setSelectedSuit(suit) }}
                 className={`w-11 h-9 rounded-xl border font-bold text-lg transition-colors ${
                   selectedSuit === suit
                     ? 'bg-gold text-black border-gold'
@@ -142,9 +146,11 @@ export function StagePrompt({ stage, onGuess, disabled }: Props) {
           <motion.button
             whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.97 }}
+            onMouseEnter={() => audioManager.play('mouse-over-2')}
             disabled={!selectedValue || !selectedSuit || disabled}
             onClick={() => {
               if (selectedValue && selectedSuit) {
+                audioManager.play('soft-click')
                 onGuess({ value: selectedValue, suit: selectedSuit } as Stage5Guess)
               }
             }}

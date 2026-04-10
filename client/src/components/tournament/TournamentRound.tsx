@@ -218,7 +218,8 @@ export function TournamentRound({
       <div className="w-full max-w-2xl flex items-start justify-between relative">
         <div className="flex gap-2">
           <button
-            onClick={() => { onForfeit(); navigate('/') }}
+            onClick={() => { audioManager.play('soft-click'); onForfeit(); navigate('/') }}
+            onMouseEnter={() => audioManager.play('mouse-over-2')}
             className="w-10 h-10 flex items-center justify-center rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 transition-colors z-50"
             title="Back to Title"
           >
@@ -227,7 +228,8 @@ export function TournamentRound({
             </svg>
           </button>
           <button
-            onClick={toggleMute}
+            onClick={() => { audioManager.play('soft-click'); toggleMute() }}
+            onMouseEnter={() => audioManager.play('mouse-over-2')}
             className={`w-10 h-10 flex items-center justify-center rounded-lg border transition-colors z-50 ${muted ? 'bg-white/5 border-white/10 text-white/30' : 'bg-white/5 border-white/10 text-white/70 hover:bg-white/10'}`}
             title={muted ? 'Unmute' : 'Mute'}
           >
@@ -374,7 +376,8 @@ export function TournamentRound({
                 <motion.button
                   whileHover={{ scale: 1.03 }}
                   whileTap={{ scale: 0.97 }}
-                  onClick={onCashOut}
+                  onMouseEnter={() => audioManager.play('mouse-over-2')}
+                  onClick={() => { audioManager.play('soft-click'); onCashOut() }}
                   className="flex-1 py-3 rounded-xl bg-gold text-black font-bold text-sm animate-pulse"
                 >
                   Cash Out 💰
@@ -382,7 +385,8 @@ export function TournamentRound({
                 <motion.button
                   whileHover={{ scale: 1.03 }}
                   whileTap={{ scale: 0.97 }}
-                  onClick={onContinue}
+                  onMouseEnter={() => audioManager.play('mouse-over-2')}
+                  onClick={() => { audioManager.play('soft-click'); onContinue() }}
                   className="flex-1 py-3 rounded-xl border border-white/30 text-white font-semibold text-sm hover:border-white/60"
                 >
                   Keep Going →

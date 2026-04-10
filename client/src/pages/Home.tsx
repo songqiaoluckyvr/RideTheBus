@@ -124,7 +124,8 @@ export function Home() {
 
           {DEV_MODE_ENABLED ? (
             <button
-              onClick={() => { if (!devMode) audioManager.play('joker-gold-unlock'); setDevMode(!devMode) }}
+              onClick={() => { audioManager.play(!devMode ? 'joker-gold-unlock' : 'soft-click'); setDevMode(!devMode) }}
+              onMouseEnter={() => audioManager.play('mouse-over-2')}
               className={`px-3 py-1.5 text-xs rounded-lg border font-mono transition-colors ${
                 devMode
                   ? 'border-yellow-500/60 bg-yellow-500/10 text-yellow-400'
@@ -179,7 +180,7 @@ export function Home() {
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   onMouseEnter={() => audioManager.play('mouse-over')}
-                  onClick={() => { audioManager.play('soft-click'); setMode(m.id) }}
+                  onClick={() => { audioManager.play('menu-selection-1'); setMode(m.id) }}
                   className={`flex-1 px-3 py-3 rounded-xl border text-left transition-colors ${
                     mode === m.id
                       ? 'border-gold bg-gold/10 text-white'
@@ -203,7 +204,7 @@ export function Home() {
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   onMouseEnter={() => audioManager.play('mouse-over')}
-                  onClick={() => { audioManager.play('soft-click'); setMode(m.id) }}
+                  onClick={() => { audioManager.play('menu-selection-1'); setMode(m.id) }}
                   className={`flex items-start gap-3 px-4 py-3 rounded-xl border text-left transition-colors ${
                     mode === m.id
                       ? 'border-gold bg-gold/10 text-white'
@@ -226,7 +227,7 @@ export function Home() {
           whileHover={{ scale: 1.03 }}
           whileTap={{ scale: 0.97 }}
           onMouseEnter={() => audioManager.play('mouse-over')}
-          onClick={() => { audioManager.play('soft-click'); handleStart() }}
+          onClick={() => { audioManager.play('menu-selection-1'); handleStart() }}
           className="py-4 rounded-xl bg-gold text-black font-display font-bold text-lg mt-1"
         >
           Let's Ride →

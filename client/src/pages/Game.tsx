@@ -108,6 +108,7 @@ export function Game() {
       setTimeout(() => setShowFlash(null), 600)
       if ((phase === 'cashout' && currentStage === 5) || phase === 'complete') {
         setShowAchievement(true)
+        audioManager.play('joker-gold-unlock')
       }
     }
     if (phase === 'bust') {
@@ -238,7 +239,8 @@ export function Game() {
       <div className="w-full max-w-2xl grid grid-cols-3 items-center relative z-40">
         <div className="flex gap-2">
           <button
-            onClick={() => { if (phase === 'stage' || phase === 'cashout') forfeit(); navigate('/') }}
+            onClick={() => { audioManager.play('soft-click'); if (phase === 'stage' || phase === 'cashout') forfeit(); navigate('/') }}
+            onMouseEnter={() => audioManager.play('mouse-over-2')}
             className="w-10 h-10 flex items-center justify-center rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 transition-colors z-50"
             title="Back to Title"
           >
@@ -247,7 +249,8 @@ export function Game() {
             </svg>
           </button>
           <button
-            onClick={toggleMute}
+            onClick={() => { audioManager.play('soft-click'); toggleMute() }}
+            onMouseEnter={() => audioManager.play('mouse-over-2')}
             className={`w-10 h-10 flex items-center justify-center rounded-lg border transition-colors z-50 ${muted ? 'bg-white/5 border-white/10 text-white/30' : 'bg-white/5 border-white/10 text-white/70 hover:bg-white/10'}`}
             title={muted ? 'Unmute' : 'Mute'}
           >

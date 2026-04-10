@@ -5,6 +5,7 @@ type SfxName =
   | 'menu-select'
   | 'mouse-over'
   | 'mouse-over-2'
+  | 'menu-selection-1'
   | 'soft-click'
   | 'win'
   | 'lose'
@@ -18,7 +19,8 @@ const SFX_FILES: Record<Exclude<SfxName, 'lose'>, string> = {
   'menu-select':     'audio/menu-select.mp3',
   'mouse-over':      'audio/mouse-over-1.mp3',
   'mouse-over-2':    'audio/mouse-over-2.mp3',
-  'soft-click':      'audio/soft-click.mp3',
+  'menu-selection-1':'audio/menu-selection-1.mp3',
+  'soft-click':      'audio/menu-selection-2.mp3',
   'win':             'audio/win.mp3',
   'joker-unlock':    'audio/joker-unlock.mp3',
   'joker-gold-unlock': 'audio/joker-gold-unlock.mp3',
@@ -34,6 +36,7 @@ const MUSIC_VOLUME = 0.27
 const SFX_VOLUME_SCALE: Partial<Record<SfxName, number>> = {
   'mouse-over':   0.25,
   'mouse-over-2': 1.6,
+  'menu-selection-1': 0.5,
   'soft-click':   0.05,
   'joker-unlock':      0.75,
   'joker-gold-unlock': 0.75,
