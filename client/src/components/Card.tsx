@@ -7,6 +7,8 @@ interface Props {
   size?: 'sm' | 'md' | 'lg'
   /** shake animation on loss */
   shake?: boolean
+  /** pulse glow when this is the next card to be guessed */
+  active?: boolean
 }
 
 const SUIT_SYMBOL: Record<string, string> = {
@@ -34,7 +36,7 @@ const CORNER_SUIT_SIZE = {
   lg: 'text-5xl',   // center is text-6xl
 }
 
-export function Card({ card, revealed = false, size = 'md', shake = false }: Props) {
+export function Card({ card, revealed = false, size = 'md', shake = false, active = false }: Props) {
   const sizeClass = SIZE[size]
   const centerClass = CENTER_VALUE_SIZE[size]
   const cornerSuitClass = CORNER_SUIT_SIZE[size]
@@ -43,9 +45,9 @@ export function Card({ card, revealed = false, size = 'md', shake = false }: Pro
 
   return (
     <motion.div
-      className={`relative ${sizeClass} perspective-1000`}
-      animate={shake ? { x: [0, -8, 8, -8, 8, 0] } : {}}
-      transition={{ duration: 0.4 }}
+      className={`relative ${sizeClass} perspective-1000 rounded-xl ${active ? 'ring-2 ring-gold/70 shadow-[0_0_12px_2px_rgba(212,175,55,0.4)]' : ''}`}
+      animate={shake ? { x: [0, -8, 8, -8, 8, 0] } : active ? { scale: [1, 1.03, 1] } : {}}
+      transition={shake ? { duration: 0.4 } : active ? { repeat: Infinity, duration: 1.2 } : {}}
     >
       <motion.div
         className="w-full h-full preserve-3d relative"

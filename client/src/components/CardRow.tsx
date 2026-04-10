@@ -1,6 +1,6 @@
 import { AnimatePresence, motion } from 'framer-motion'
 import type { Card as CardType } from '../lib/deck'
-import { Card, CardSlot } from './Card'
+import { Card } from './Card'
 import type { Stage } from '../lib/stages'
 
 interface Props {
@@ -33,11 +33,13 @@ export function CardRow({ revealedCards, currentStage, phase, shake }: Props) {
             transition={{ delay: i * 0.05 }}
           >
             <span className="text-xs text-white/40">{STAGE_LABELS[i]}</span>
-            {isRevealed ? (
-              <Card card={card} revealed size="md" shake={isLostHere} />
-            ) : (
-              <CardSlot active={isActive} size="md" />
-            )}
+            <Card
+              card={isRevealed ? card : undefined}
+              revealed={isRevealed}
+              size="md"
+              shake={isLostHere}
+              active={isActive && !isRevealed}
+            />
           </motion.div>
         )
       })}
