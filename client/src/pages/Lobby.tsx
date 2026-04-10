@@ -26,7 +26,6 @@ export function Lobby() {
 
   useEffect(() => {
     audioManager.startBgMusic(2)
-    return () => audioManager.stopBgMusic()
   }, [])
 
   // Navigate to tournament when game starts

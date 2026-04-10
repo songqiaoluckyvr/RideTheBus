@@ -49,7 +49,6 @@ export function Home() {
     return () => {
       document.removeEventListener('click', startOnInteraction)
       document.removeEventListener('keydown', startOnInteraction)
-      audioManager.stopBgMusic()
     }
   }, [])
 
@@ -73,7 +72,7 @@ export function Home() {
         <img src={uiImageUrl('table-felt')} alt="" aria-hidden className="w-full h-full object-fill opacity-95" />
       </div>
       {/* Content column */}
-      <div className="w-full max-w-lg min-h-screen flex flex-col items-center gap-8 pt-10 pb-8">
+      <div className="w-full max-w-lg min-h-screen flex flex-col items-center gap-4 pt-10 pb-8">
 
         {/* Top bar with buttons */}
         <div className="w-full flex items-center justify-between px-4">

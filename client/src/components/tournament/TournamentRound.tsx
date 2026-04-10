@@ -76,7 +76,6 @@ export function TournamentRound({
   // Background music
   useEffect(() => {
     audioManager.startBgMusic(2)
-    return () => audioManager.stopBgMusic()
   }, [])
 
   // Deck shuffle on new stage-1 entry
