@@ -17,7 +17,7 @@ export function CardRow({ revealedCards, currentStage, phase, shake }: Props) {
   const totalSlots = 5
 
   return (
-    <div className="flex gap-3 items-end justify-center">
+    <div className="flex gap-1.5 md:gap-3 items-end justify-center">
       {Array.from({ length: totalSlots }).map((_, i) => {
         const stageNum = i + 1
         const card = revealedCards[i]
