@@ -21,9 +21,10 @@ const SUIT_COLOR: Record<Suit, string> = {
   clubs: 'text-white', spades: 'text-white',
 }
 
-function Btn({ label, onClick, disabled, color = 'default' }: {
+function Btn({ label, onClick, disabled, color = 'default', className = '' }: {
   label: string; onClick: () => void; disabled?: boolean
   color?: 'red' | 'black' | 'default' | Suit
+  className?: string
 }) {
   const colors: Record<string, string> = {
     default: 'bg-felt-light hover:bg-felt border-gold/30 hover:border-gold/60 text-white',
@@ -41,7 +42,7 @@ function Btn({ label, onClick, disabled, color = 'default' }: {
       onMouseEnter={() => audioManager.play('mouse-over-2')}
       onClick={() => { audioManager.play('soft-click'); onClick() }}
       disabled={disabled}
-      className={`px-5 py-3 rounded-xl border font-semibold transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${colors[color] ?? colors.default}`}
+      className={`px-4 py-3 rounded-xl border font-semibold transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${colors[color] ?? colors.default} ${className}`}
     >
       {label}
     </motion.button>
@@ -66,36 +67,44 @@ export function StagePrompt({ stage, onGuess, disabled }: Props) {
       </div>
 
       {stage === 1 && (
-        <div className="flex gap-4">
-          <Btn label="🔴 Red" color="red" onClick={() => onGuess('red')} disabled={disabled} />
-          <Btn label="⚫ Black" color="black" onClick={() => onGuess('black')} disabled={disabled} />
+        <div className="flex gap-2 md:gap-4 w-full max-w-xs">
+          <Btn label="🔴 Red" color="red" onClick={() => onGuess('red')} disabled={disabled} className="flex-1" />
+          <Btn label="⚫ Black" color="black" onClick={() => onGuess('black')} disabled={disabled} className="flex-1" />
         </div>
       )}
 
       {stage === 2 && (
-        <div className="flex gap-4">
-          <Btn label="⬆ Higher" onClick={() => onGuess('higher')} disabled={disabled} />
-          <Btn label="⬇ Lower" onClick={() => onGuess('lower')} disabled={disabled} />
+        <div className="flex gap-2 md:gap-4 w-full max-w-xs">
+          <Btn label="⬆ Higher" onClick={() => onGuess('higher')} disabled={disabled} className="flex-1" />
+          <Btn label="⬇ Lower" onClick={() => onGuess('lower')} disabled={disabled} className="flex-1" />
         </div>
       )}
 
       {stage === 3 && (
-        <div className="flex gap-4">
-          <Btn label="↔ Inside" onClick={() => onGuess('inside')} disabled={disabled} />
-          <Btn label="↕ Outside" onClick={() => onGuess('outside')} disabled={disabled} />
+        <div className="flex gap-2 md:gap-4 w-full max-w-xs">
+          <Btn label="↔ Inside" onClick={() => onGuess('inside')} disabled={disabled} className="flex-1" />
+          <Btn label="↕ Outside" onClick={() => onGuess('outside')} disabled={disabled} className="flex-1" />
         </div>
       )}
 
       {stage === 4 && (
-        <div className="flex gap-4">
+        <div className="grid grid-cols-4 gap-2 w-full max-w-xs md:max-w-sm">
           {SUITS.map((suit) => (
-            <Btn
+            <motion.button
               key={suit}
-              label={`${SUIT_SYMBOL[suit]} ${suit.charAt(0).toUpperCase() + suit.slice(1)}`}
-              color={suit}
-              onClick={() => onGuess(suit)}
+              whileHover={{ scale: 1.04 }}
+              whileTap={{ scale: 0.97 }}
+              onMouseEnter={() => audioManager.play('mouse-over-2')}
+              onClick={() => { audioManager.play('soft-click'); onGuess(suit) }}
               disabled={disabled}
-            />
+              className={`aspect-square rounded-xl border font-bold text-3xl flex items-center justify-center transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${
+                suit === 'hearts' || suit === 'diamonds'
+                  ? 'bg-red-900/40 hover:bg-red-800/60 border-red-400/40 text-red-300'
+                  : 'bg-gray-800/40 hover:bg-gray-700/60 border-gray-400/40 text-gray-200'
+              }`}
+            >
+              {SUIT_SYMBOL[suit]}
+            </motion.button>
           ))}
         </div>
       )}
@@ -103,16 +112,16 @@ export function StagePrompt({ stage, onGuess, disabled }: Props) {
       {stage === 5 && (
         <div className="flex flex-col items-center gap-3 w-full max-w-xl">
           {/* Value selector */}
-          <div className="flex flex-col items-center gap-2">
+          <div className="flex flex-col items-center gap-1.5">
             {[['A','2','3','4','5','6','7'], ['8','9','10','J','Q','K']].map((row, rowIdx) => (
-              <div key={rowIdx} className="flex gap-2">
+              <div key={rowIdx} className="flex gap-1 md:gap-2">
                 {row.map((v) => (
                   <motion.button
                     key={v}
                     whileTap={{ scale: 0.93 }}
                     onMouseEnter={() => audioManager.play('mouse-over-2')}
                     onClick={() => { audioManager.play('soft-click'); setSelectedValue(v as Value) }}
-                    className={`w-11 h-9 rounded-lg border font-bold text-sm transition-colors ${
+                    className={`w-9 md:w-11 h-8 md:h-9 rounded-lg border font-bold text-xs md:text-sm transition-colors ${
                       selectedValue === v
                         ? 'bg-gold text-black border-gold'
                         : 'bg-felt-light border-white/20 text-white hover:border-gold/50'
