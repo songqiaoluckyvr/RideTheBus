@@ -2,7 +2,7 @@ import { createShuffledDeck } from './deck'
 import type { Card } from './deck'
 import type { Stage, AnyGuess, GuessResult } from './stages'
 import { evaluateGuess } from './stages'
-import { calculatePayout, degradedMultiplier, STAGE_MULTIPLIERS } from './payouts'
+import { calculatePayout, degradedMultiplier, roundMultiplier, STAGE_MULTIPLIERS } from './payouts'
 
 export type GamePhase =
   | 'idle'       // waiting for bet
@@ -110,7 +110,7 @@ export function makeGuess(
   const nextStage = (currentStage + 1) as Stage
   const isFinalStage = currentStage === 5
 
-  const effectiveMult = degradedMultiplier(multipliers[currentStage as Stage], multiplierFactor)
+  const effectiveMult = roundMultiplier(degradedMultiplier(multipliers[currentStage as Stage], multiplierFactor))
   const updatedLockedMultipliers = { ...state.lockedMultipliers, [currentStage]: effectiveMult }
 
   if (isFinalStage) {

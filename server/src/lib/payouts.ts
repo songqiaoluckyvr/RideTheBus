@@ -17,9 +17,14 @@ export function degradedMultiplier(baseMultiplier: number, factor: number): numb
   return 1 + (baseMultiplier - 1) * factor
 }
 
+/** Round multiplier to 1 decimal place (floor) — same rounding used for display. */
+export function roundMultiplier(raw: number): number {
+  return Math.floor(raw * 10) / 10
+}
+
 /** Payout given an initial bet, stage, and optional degradation factor (default 1 = no degradation) */
 export function calculatePayout(bet: number, stage: Stage, factor = 1): number {
-  return Math.floor(bet * degradedMultiplier(STAGE_MULTIPLIERS[stage], factor))
+  return Math.floor(bet * roundMultiplier(degradedMultiplier(STAGE_MULTIPLIERS[stage], factor)))
 }
 
 /** What the player stands to win next if they continue */
