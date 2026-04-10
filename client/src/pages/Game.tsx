@@ -238,7 +238,7 @@ export function Game() {
       <div className="w-full max-w-2xl grid grid-cols-3 items-center relative z-40">
         <div className="flex gap-2">
           <button
-            onClick={() => navigate('/')}
+            onClick={() => { if (phase === 'stage' || phase === 'cashout') forfeit(); navigate('/') }}
             className="w-10 h-10 flex items-center justify-center rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 transition-colors z-50"
             title="Back to Title"
           >

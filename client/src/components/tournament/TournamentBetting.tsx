@@ -4,6 +4,7 @@ import { PlayerStatusList } from './PlayerStatusList'
 import type { LeaderboardEntry, PeerStatus, TournamentConfig } from '../../store/tournamentStore'
 import { uiImageUrl } from '../../lib/cardAssets'
 import { ScrollingBackground } from '../ScrollingBackground'
+import { audioManager } from '../../lib/audioManager'
 
 const BET_TIMER_SECONDS = 20
 
@@ -35,6 +36,11 @@ export function TournamentBetting({
   const [sliderValue, setSliderValue] = useState(Math.floor(maxBet * 0.25))
   const [timeLeft, setTimeLeft] = useState(BET_TIMER_SECONDS)
   const timedOut = useRef(false)
+
+  // Switch to game music on betting screen
+  useEffect(() => {
+    audioManager.startBgMusic(1)
+  }, [])
 
   // Countdown — only while bet not placed
   useEffect(() => {

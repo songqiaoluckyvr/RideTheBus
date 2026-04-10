@@ -11,6 +11,7 @@ import { DEV_MODE_ENABLED } from '../../config'
 import { Card } from '../Card'
 import { uiImageUrl } from '../../lib/cardAssets'
 import { ScrollingBackground } from '../ScrollingBackground'
+import { useNavigate } from 'react-router-dom'
 import { audioManager } from '../../lib/audioManager'
 
 // ─── Timer configuration per mode ────────────────────────────────────────────
@@ -58,12 +59,20 @@ export function TournamentRound({
   onForfeit,
 }: Props) {
   const { gamePhase, currentStage, revealedCards, bet, roundPayout, lockedMultipliers, devDeck } = roundState
+  const navigate = useNavigate()
 
   const timerConfig = ROUND_TIMER_CONFIG[mode] ?? ROUND_TIMER_CONFIG['tournament']
   const isDegrading = timerConfig.type === 'degrading'
 
   const [showFlash, setShowFlash] = useState<'win' | 'loss' | null>(null)
   const [shake, setShake] = useState(false)
+  const [muted, setMuted] = useState(audioManager.muted)
+
+  const toggleMute = () => {
+    const next = !muted
+    audioManager.setMuted(next)
+    setMuted(next)
+  }
   const [timeLeft, setTimeLeft] = useState(TIMER_SECONDS)
   const [graceActive, setGraceActive] = useState(false)
   const [prevPhase, setPrevPhase] = useState(gamePhase)
@@ -73,9 +82,9 @@ export function TournamentRound({
   const isRed = pct <= 0.2
   const isYellow = !isRed && pct <= 0.5
 
-  // Background music
+  // Background music — game track
   useEffect(() => {
-    audioManager.startBgMusic(2)
+    audioManager.startBgMusic(1)
   }, [])
 
   // Deck shuffle on new stage-1 entry
@@ -207,12 +216,38 @@ export function TournamentRound({
 
       {/* Header */}
       <div className="w-full max-w-2xl flex items-start justify-between relative">
-        <div className="w-24">
+        <div className="flex gap-2">
+          <button
+            onClick={() => { onForfeit(); navigate('/') }}
+            className="w-10 h-10 flex items-center justify-center rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 transition-colors z-50"
+            title="Back to Title"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5 text-white/70">
+              <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h4a1 1 0 001-1v-3h2v3a1 1 0 001 1h4a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
+            </svg>
+          </button>
+          <button
+            onClick={toggleMute}
+            className={`w-10 h-10 flex items-center justify-center rounded-lg border transition-colors z-50 ${muted ? 'bg-white/5 border-white/10 text-white/30' : 'bg-white/5 border-white/10 text-white/70 hover:bg-white/10'}`}
+            title={muted ? 'Unmute' : 'Mute'}
+          >
+            {muted ? (
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5">
+                <path d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.707.707L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.707-3.707a1 1 0 011.09-.217zM12.293 7.293a1 1 0 011.414 0L15 8.586l1.293-1.293a1 1 0 111.414 1.414L16.414 10l1.293 1.293a1 1 0 01-1.414 1.414L15 11.414l-1.293 1.293a1 1 0 01-1.414-1.414L13.586 10l-1.293-1.293a1 1 0 010-1.414z" />
+              </svg>
+            ) : (
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
+                <path d="M19.952 1.651a.75.75 0 01.298.599V16.303a3 3 0 01-2.176 2.884l-1.32.377a2.553 2.553 0 11-1.403-4.909l2.311-.66a1.5 1.5 0 001.088-1.442V6.994l-9 2.572v9.737a3 3 0 01-2.176 2.884l-1.32.377a2.553 2.553 0 11-1.402-4.909l2.31-.66A1.5 1.5 0 008.25 15.5V5.251a.75.75 0 01.544-.721l10.5-3a.75.75 0 01.658.121z" />
+              </svg>
+            )}
+          </button>
+        </div>
+        <div className="absolute left-1/2 -translate-x-1/2 text-center">
+          <h1 className="font-display font-bold text-gold text-3xl">
+            {mode === 'battle-royale' ? 'Battle Royale' : 'Tournament'}
+          </h1>
           <p className="text-white/40 text-xs">Round {roundNumber}{config.totalRounds > 0 ? ` of ${config.totalRounds}` : ''}</p>
         </div>
-        <h1 className="font-display font-bold text-gold text-3xl absolute left-1/2 -translate-x-1/2">
-          {mode === 'battle-royale' ? 'Battle Royale' : 'Tournament'}
-        </h1>
         <div className="text-right">
           <p className="text-white/40 text-xs">Bet</p>
           <p className="text-gold font-bold text-xl">${bet.toLocaleString()}</p>

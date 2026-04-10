@@ -28,12 +28,12 @@ export function Lobby() {
     audioManager.startBgMusic(2)
   }, [])
 
-  // Navigate to tournament when game starts
+  // Navigate to game when it starts
   useEffect(() => {
     if (tournamentPhase === 'betting') {
-      navigate('/tournament')
+      navigate(isBR ? '/battle-royale' : '/tournament')
     }
-  }, [tournamentPhase, navigate])
+  }, [tournamentPhase, navigate, isBR])
 
   // Clear error after 3s
   useEffect(() => {
@@ -126,7 +126,8 @@ export function Lobby() {
             <motion.button
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.97 }}
-              onClick={() => socket.setReady(room.code)}
+              onMouseEnter={() => audioManager.play('mouse-over')}
+              onClick={() => { audioManager.play('soft-click'); socket.setReady(room.code) }}
               className="py-3 rounded-xl bg-gold text-black font-bold text-lg"
             >
               I'm Ready ✓
@@ -137,7 +138,8 @@ export function Lobby() {
             <motion.button
               whileHover={{ scale: allReady ? 1.03 : 1 }}
               whileTap={{ scale: allReady ? 0.97 : 1 }}
-              onClick={() => allReady && socket.startGame(room.code)}
+              onMouseEnter={() => allReady && audioManager.play('mouse-over')}
+              onClick={() => { if (allReady) { audioManager.play('soft-click'); socket.startGame(room.code) } }}
               disabled={!allReady}
               className={`py-3 rounded-xl font-bold text-lg transition-all ${
                 allReady
@@ -160,7 +162,8 @@ export function Lobby() {
           <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            onClick={handleBack}
+            onMouseEnter={() => audioManager.play('mouse-over')}
+            onClick={() => { audioManager.play('soft-click'); handleBack() }}
             className="py-2 rounded-xl border border-white/15 text-white/40 text-sm"
           >
             Leave Room
@@ -213,7 +216,8 @@ export function Lobby() {
         {(['create', 'join'] as const).map((t) => (
           <button
             key={t}
-            onClick={() => { setTab(t); setRoomError(null) }}
+            onClick={() => { audioManager.play('soft-click'); setTab(t); setRoomError(null) }}
+            onMouseEnter={() => audioManager.play('mouse-over-2')}
             className={`px-6 py-2 rounded-lg text-sm font-semibold transition-all capitalize ${
               tab === t ? 'bg-gold text-black' : 'text-white/40 hover:text-white/70'
             }`}
@@ -237,7 +241,8 @@ export function Lobby() {
               {BUY_INS.map((amount) => (
                 <button
                   key={amount}
-                  onClick={() => setSelectedBuyIn(amount)}
+                  onClick={() => { audioManager.play('soft-click'); setSelectedBuyIn(amount) }}
+                  onMouseEnter={() => audioManager.play('mouse-over-2')}
                   className={`flex-1 py-3 rounded-xl font-bold text-lg border transition-all ${
                     selectedBuyIn === amount
                       ? 'border-gold bg-gold/10 text-gold'
@@ -254,7 +259,8 @@ export function Lobby() {
             <motion.button
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.97 }}
-              onClick={handleCreate}
+              onMouseEnter={() => audioManager.play('mouse-over')}
+              onClick={() => { audioManager.play('soft-click'); handleCreate() }}
               disabled={!name.trim()}
               className="py-3 rounded-xl bg-gold text-black font-bold text-lg disabled:opacity-30 disabled:cursor-not-allowed"
             >
@@ -281,7 +287,8 @@ export function Lobby() {
             <motion.button
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.97 }}
-              onClick={handleJoin}
+              onMouseEnter={() => audioManager.play('mouse-over')}
+              onClick={() => { audioManager.play('soft-click'); handleJoin() }}
               disabled={!name.trim() || joinCode.length < 5}
               className="py-3 rounded-xl bg-gold text-black font-bold text-lg disabled:opacity-30 disabled:cursor-not-allowed"
             >
@@ -294,7 +301,8 @@ export function Lobby() {
       <motion.button
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
-        onClick={handleBack}
+        onMouseEnter={() => audioManager.play('mouse-over')}
+        onClick={() => { audioManager.play('soft-click'); handleBack() }}
         className="px-6 py-2 rounded-xl border border-white/15 text-white/40 text-sm"
       >
         ← Back

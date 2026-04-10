@@ -29,9 +29,11 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     <HashRouter>
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/game" element={<Game />} />
+        <Route path="/solo-normal" element={<Game />} />
+        <Route path="/solo-hard" element={<Game />} />
         <Route path="/lobby" element={<Lobby />} />
         <Route path="/tournament" element={<Tournament />} />
+        <Route path="/battle-royale" element={<Tournament />} />
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </HashRouter>
